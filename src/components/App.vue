@@ -1,14 +1,53 @@
-<template lang="jade">
-    div
-        p.hello Hello world
+<template>
+    <div class="flex-col height100">
+        <div class="dev-border">Future Toolbar!</div>
+        <div class="flex-row flex-grow">
+            <div class="dev-border flex-col">
+                <div class="dev-border flex-grow">
+                    Tools?
+                </div>
+                <button>Back</button>
+            </div>
+            <div class="dev-border flex-grow">Future Left Score Page</div>
+            <div class="dev-border flex-grow">Future Right Score Page</div>
+            <div class="dev-border flex-col">
+                <div class="dev-border flex-grow">
+                    Tools?
+                </div>
+                <button>Next</button>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script lang="ts">
-    export default {}
+    export default {
+        data: function() {
+            return {}
+        }
+    }
 </script>
 
 <style lang="scss" scoped>
-    .hello {
-        padding-top: 75px;
+    .height100 {
+        height: 100%;
+    }
+
+    .flex-col {
+        display: flex;
+        flex-flow: column nowrap
+    }
+
+    .flex-row {
+        display: flex;
+        flex-flow: row nowrap;
+    }
+
+    .flex-grow {
+        flex-grow: 1;
+    }
+
+    .dev-border {
+        border: 1px solid black;
     }
 </style>

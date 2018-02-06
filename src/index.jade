@@ -5,6 +5,12 @@ html(lang="en")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         meta(http-equiv="X-UA-Compatible", content="ie=edge")
         title Electron
+        style(type="text/css").
+            body, html{
+                height: 100%;
+                margin: 0px;
+                padding: 0px;
+            }
     body
         #app
         // The transpiled TypeScript expects CommonJS "exports" to be available in the global namespace
