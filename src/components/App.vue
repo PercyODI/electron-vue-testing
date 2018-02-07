@@ -8,8 +8,8 @@
                 </div>
                 <button>Back</button>
             </div>
-            <ScorePage class="" side="left" />
-            <ScorePage class="" side="right" />
+            <ScorePage class="height100" ref="leftScorePage" side="left" :height="heightStr"/>
+            <ScorePage class="height100" side="right" />
             <!-- <div class="dev-border flex-grow">Future Left Score Page</div>
             <div class="dev-border flex-grow">Future Right Score Page</div> -->
             <div class="dev-border flex-col">
@@ -27,10 +27,18 @@
     
     export default {
         data: function() {
-            return {}
+            return {
+                heightStr: "0px"
+            }
         },
         components: {
             ScorePage
+        },
+        methods: {
+            matchHeight() {
+                var heightString = this.$refs.leftScorePage.clientHeight + "px";
+                this.heightStr = heightString;
+            }
         }
     }
 </script>
