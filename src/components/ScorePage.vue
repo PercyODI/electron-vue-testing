@@ -17,7 +17,7 @@ export default {
     },
     watch: {
         height: function(newVal, oldVal) {
-            imgHeight = newVal;
+            this.imgHeight = newVal;
         }
     },
     computed: {
@@ -27,6 +27,9 @@ export default {
                 "sp-right": this.side == "right"
             };
         }
+    },
+    mounted() {
+        this.imgHeight = this.height;
     }
 };
 </script>

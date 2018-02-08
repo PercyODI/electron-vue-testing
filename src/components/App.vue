@@ -36,9 +36,13 @@
         },
         methods: {
             matchHeight() {
-                var heightString = this.$refs.leftScorePage.clientHeight + "px";
+                console.log(this.$refs.leftScorePage.$el.clientHeight);
+                var heightString = this.$refs.leftScorePage.$el.clientHeight + "px";
                 this.heightStr = heightString;
             }
+        },
+        mounted: function() {
+            window.addEventListener("resize", this.matchHeight);
         }
     }
 </script>
