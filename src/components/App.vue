@@ -1,15 +1,15 @@
 <template>
     <div class="flex-col height100 width100">
         <div class="dev-border">Future Toolbar!</div>
-        <div class="flex-row flex-grow height100">
+        <div class="flex-row flex-grow">
             <div class="dev-border flex-col">
                 <div class="dev-border flex-grow">
                     Tools?
                 </div>
                 <button>Back</button>
             </div>
-            <ScorePage class="height100" ref="leftScorePage" side="left" :height="heightStr"/>
-            <ScorePage class="height100" side="right" />
+            <ScorePage class="flex-grow" ref="leftScorePage" side="left" :height="spHeight" :width="spWidth" />
+            <ScorePage class="flex-grow" side="right" :height="spHeight" :width="spWidth" />
             <!-- <div class="dev-border flex-grow">Future Left Score Page</div>
             <div class="dev-border flex-grow">Future Right Score Page</div> -->
             <div class="dev-border flex-col">
@@ -28,21 +28,22 @@
     export default {
         data: function() {
             return {
-                heightStr: "0px"
+                spHeight: 0,
+                spWidth: 0
             }
         },
         components: {
             ScorePage
         },
         methods: {
-            matchHeight() {
-                console.log(this.$refs.leftScorePage.$el.clientHeight);
-                var heightString = this.$refs.leftScorePage.$el.clientHeight + "px";
-                this.heightStr = heightString;
+            setSize() {
+                this.spHeight = this.$refs.leftScorePage.$el.clientHeight;
+                this.spWidth = this.$refs.leftScorePage.$el.clientWidth;
             }
         },
         mounted: function() {
-            window.addEventListener("resize", this.matchHeight);
+            this.setSize();
+            window.addEventListener("resize", this.setSize);
         }
     }
 </script>

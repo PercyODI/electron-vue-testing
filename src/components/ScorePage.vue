@@ -1,47 +1,70 @@
 <template>
     <div v-bind:class="classObject">
-        <img src="C:\test\1.png" alt="" v-bind:height="imgHeight">
+        <div class="imageWrapper"
+            <!-- v-bind:style="{height: this.compHeight + 'px', width: this.compWidth + 'px'}" > -->
+            <img src="C:\test\1.png" 
+                alt="" 
+                v-on:click="aClick()"
+                ref="image">
+        </div>
     </div>
 </template>
 
-<script lang="ts">
+<script>
 export default {
-    data: function() {
-        return {
-            imgHeight: "50px",
-        }
+  data: function() {
+    return {
+      originalHeight: 0,
+      originalWidth: 0,
+      scale: 1
+    };
+  },
+  props: {
+    side: String,
+    height: Number,
+    width: Number
+  },
+  computed: {
+    classObject: function() {
+      return {
+        "sp-left": this.side == "left",
+        "sp-right": this.side == "right"
+      };
     },
-    props: {
-        side: String,
-        height: String
+    compHeight: function() {
+      return this.originalHeight * this.scale;
     },
-    watch: {
-        height: function(newVal, oldVal) {
-            this.imgHeight = newVal;
-        }
-    },
-    computed: {
-        classObject: function(): any {
-            return {
-                "sp-left": this.side == "left",
-                "sp-right": this.side == "right"
-            };
-        }
-    },
-    mounted() {
-        this.imgHeight = this.height;
+    compWidth: function() {
+      return this.originalWidth * this.scale;
     }
+  },
+  methods: {
+    aClick() {
+      alert(
+        `OriginalHeight: ${this.originalHeight}. CompHeight: ${this.compHeight}`
+      );
+    }
+  },
+  mounted: function() {
+    console.log(this.$refs.image);
+    this.originalHeight = this.$refs.image.naturalHeight;
+    this.originalWidth = this.$refs.image.naturalWidth;
+    this.scale = Math.min(
+      this.height / this.originalHeight,
+      this.width / this.originalWidth
+    );
+  }
 };
 </script>
 
 <style scoped>
 img {
-  max-width: 100%;
-  max-height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
-.sp-left {
-  display: flex;
-  justify-content: flex-end;
-}
+/* .sp-left {
+        display: flex;
+        justify-content: flex-end;
+    } */
 </style>
