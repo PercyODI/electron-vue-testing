@@ -8,10 +8,10 @@
                 </div>
                 <button>Back</button>
             </div>
-            <ScorePage class="flex-grow" ref="leftScorePage" side="left" :height="spHeight" :width="spWidth" />
-            <ScorePage class="flex-grow" side="right" :height="spHeight" :width="spWidth" />
-            <!-- <div class="dev-border flex-grow">Future Left Score Page</div>
-            <div class="dev-border flex-grow">Future Right Score Page</div> -->
+            <div class="flex-grow flex-row width100" ref="scoreZone">
+                <ScorePage class="flex-grow" side="left" :height="spHeight" :width="spWidth" />
+                <ScorePage class="flex-grow" side="right" :height="spHeight" :width="spWidth" />
+            </div>
             <div class="dev-border flex-col">
                 <div class="dev-border flex-grow">
                     Tools?
@@ -22,7 +22,7 @@
     </div>
 </template>
 
-<script lang="ts">
+<script>
     import * as ScorePage from "./ScorePage.vue";
     
     export default {
@@ -37,8 +37,8 @@
         },
         methods: {
             setSize() {
-                this.spHeight = this.$refs.leftScorePage.$el.clientHeight;
-                this.spWidth = this.$refs.leftScorePage.$el.clientWidth;
+                this.spHeight = this.$refs.scoreZone.clientHeight;
+                this.spWidth = this.$refs.scoreZone.clientWidth / 2;
             }
         },
         mounted: function() {

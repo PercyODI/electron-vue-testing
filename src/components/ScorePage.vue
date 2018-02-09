@@ -1,10 +1,12 @@
 <template>
-    <div v-bind:class="classObject">
-        <div class="imageWrapper"
-            <!-- v-bind:style="{height: this.compHeight + 'px', width: this.compWidth + 'px'}" > -->
+    <div 
+      v-bind:class="classObject" 
+      v-bind:style="{height: this.compHeight + 'px', width: this.compWidth + 'px'}">
+        <div class="imageWrapper">
             <img src="C:\test\1.png" 
                 alt="" 
                 v-on:click="aClick()"
+                v-on:load="imgLoaded()"
                 ref="image">
         </div>
     </div>
@@ -43,16 +45,29 @@ export default {
       alert(
         `OriginalHeight: ${this.originalHeight}. CompHeight: ${this.compHeight}`
       );
+    },
+    imgLoaded() {
+      console.log(this.$refs.image);
+      this.$refs.image.addEventListener;
+      this.originalHeight = this.$refs.image.naturalHeight;
+      this.originalWidth = this.$refs.image.naturalWidth;
+      this.updateScale();
+    },
+    updateScale() {
+      this.scale = Math.min(
+        this.height / this.originalHeight,
+        this.width / this.originalWidth
+      );
     }
   },
-  mounted: function() {
-    console.log(this.$refs.image);
-    this.originalHeight = this.$refs.image.naturalHeight;
-    this.originalWidth = this.$refs.image.naturalWidth;
-    this.scale = Math.min(
-      this.height / this.originalHeight,
-      this.width / this.originalWidth
-    );
+  mounted: function() {},
+  watch: {
+    height: function(oldVal, newVal) {
+      this.updateScale();
+    },
+    width: function(oldVal, newVal) {
+      this.updateScale();
+    }
   }
 };
 </script>
