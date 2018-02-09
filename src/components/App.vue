@@ -53,7 +53,7 @@ export default {
         }
     },
     nextTwoPages() {
-        if(this.currentRightFile < this.files.length){
+        if(this.currentRightFile < this.files.length - 1){
             this.currentLeftFile += 2;
             this.currentRightFile += 2;
         }
@@ -77,6 +77,19 @@ export default {
   mounted: function() {
     this.setSize();
     window.addEventListener("resize", this.setSize);
+    window.addEventListener("keydown", (event) => {
+        console.log(event);
+        switch (event.key) {
+            case "ArrowRight":
+                this.nextTwoPages();
+                break;
+            case "ArrowLeft":
+                this.backTwoPages();
+                break;
+            default:
+                break;
+        }
+    });
   }
 };
 </script>
