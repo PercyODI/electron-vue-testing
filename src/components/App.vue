@@ -2,17 +2,17 @@
     <div class="flex-col height100 width100">
         <div class="dev-border">Future Toolbar!</div>
         <div class="flex-row flex-grow">
-            <div class="dev-border flex-col">
+            <div class="dev-border flex-col" ref="toolbarLeft">
                 <div class="dev-border flex-grow">
                     Tools?
                 </div>
                 <button>Back</button>
             </div>
-            <div class="flex-grow flex-row width100" ref="scoreZone">
+            <div class="flex-grow flex-row width100">
                 <ScorePage class="flex-grow" side="left" :height="spHeight" :width="spWidth" />
                 <ScorePage class="flex-grow" side="right" :height="spHeight" :width="spWidth" />
             </div>
-            <div class="dev-border flex-col">
+            <div class="dev-border flex-col" ref="toolbarRight">
                 <div class="dev-border flex-grow">
                     Tools?
                 </div>
@@ -37,8 +37,8 @@ export default {
   },
   methods: {
     setSize() {
-      this.spHeight = this.$refs.scoreZone.clientHeight;
-      this.spWidth = this.$refs.scoreZone.clientWidth / 2;
+      this.spHeight = this.$refs.toolbarLeft.clientHeight;
+      this.spWidth = (window.innerWidth - this.$refs.toolbarLeft.clientWidth - this.$refs.toolbarRight.clientWidth) / 2;
     }
   },
   mounted: function() {
