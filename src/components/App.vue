@@ -6,17 +6,17 @@
                 <div class="dev-border flex-grow">
                     Tools?
                 </div>
-                <button>Back</button>
+                <button v-on:click="backTwoPages()">Back</button>
             </div>
-            <div class="flex-grow flex-row width100">
-                <ScorePage class="flex-grow" side="left" :height="spHeight" :width="spWidth" />
-                <ScorePage class="flex-grow" side="right" :height="spHeight" :width="spWidth" />
+            <div class="flex-grow flex-row flex-Justify-center width100">
+                <ScorePage class="" side="left" :height="spHeight" :width="spWidth" :imgPath="files[currentLeftFile]" />
+                <ScorePage class="" side="right" :height="spHeight" :width="spWidth" :imgPath="files[currentRightFile]" />
             </div>
             <div class="dev-border flex-col" ref="toolbarRight">
                 <div class="dev-border flex-grow">
                     Tools?
                 </div>
-                <button>Next</button>
+                <button v-on:click="nextTwoPages()">Next</button>
             </div>
         </div>
     </div>
@@ -24,12 +24,18 @@
 
 <script>
 import * as ScorePage from "./ScorePage.vue";
+import { remote } from "electron";
+import fs from "fs";
+import path from "path";
 
 export default {
   data: function() {
     return {
       spHeight: 0,
-      spWidth: 0
+      spWidth: 0,
+      files: [],
+      currentLeftFile: 0,
+      currentRightFile: 1
     };
   },
   components: {
@@ -39,7 +45,34 @@ export default {
     setSize() {
       this.spHeight = this.$refs.toolbarLeft.clientHeight;
       this.spWidth = (window.innerWidth - this.$refs.toolbarLeft.clientWidth - this.$refs.toolbarRight.clientWidth) / 2;
+    },
+    backTwoPages() {
+        if (this.currentLeftFile > 0) {
+            this.currentLeftFile -= 2;
+            this.currentRightFile -= 2;
+        }
+    },
+    nextTwoPages() {
+        if(this.currentRightFile < this.files.length){
+            this.currentLeftFile += 2;
+            this.currentRightFile += 2;
+        }
     }
+  },
+  created: function() {
+      remote.dialog.showOpenDialog({
+          properties: [
+              "openDirectory"
+          ],
+          filters: [
+              { name: "images", extensions: ["png", "jpg", "gif"]}, 
+          ],
+      }, (directoryPath) => {
+          console.log(directoryPath);
+          let newFiles = fs.readdirSync(directoryPath[0]);
+          newFiles = newFiles.map((fileName) => path.join(directoryPath[0], fileName));
+          this.files = this.files.concat(newFiles);
+      })
   },
   mounted: function() {
     this.setSize();
@@ -71,6 +104,10 @@ export default {
 
 .flex-grow {
   flex-grow: 1;
+}
+
+.flex-Justify-center {
+    justify-content: center;
 }
 
 .dev-border {

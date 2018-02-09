@@ -16,6 +16,7 @@ const createWindow = async () => {
         height: 768
     })
     window.loadURL(`file://${__dirname}/index.jade`)
+    window.setAutoHideMenuBar(true)
     if (isDevMode) {
         await installExtension(VUEJS_DEVTOOLS)
         window.webContents.openDevTools({mode: 'bottom'})
