@@ -5,6 +5,7 @@
   "main": "src/main.ts",
   "dependencies": {
     "fs": "0.0.1-security",
+    "lodash": "^4.17.5",
     "path": "^0.12.7",
     "vue": "^2.4.4",
     "vueify": "^9.4.1"

@@ -9,8 +9,8 @@
                 <button v-on:click="backTwoPages()">Back</button>
             </div>
             <div class="flex-grow flex-row flex-Justify-center width100">
-                <ScorePage class="" side="left" :height="spHeight" :width="spWidth" :imgPath="files[currentLeftFile]" />
-                <ScorePage class="" side="right" :height="spHeight" :width="spWidth" :imgPath="files[currentRightFile]" />
+                <ScorePage class="" side="left" :height="spHeight" :width="spWidth" :img="images[currentLeftFile]" />
+                <ScorePage class="" side="right" :height="spHeight" :width="spWidth" :img="images[currentRightFile]" />
             </div>
             <div class="dev-border flex-col" ref="toolbarRight">
                 <div class="dev-border flex-grow">
@@ -27,13 +27,14 @@ import * as ScorePage from "./ScorePage.vue";
 import { remote } from "electron";
 import fs from "fs";
 import path from "path";
+import _ from "lodash";
 
 export default {
   data: function() {
     return {
       spHeight: 0,
       spWidth: 0,
-      files: [],
+      images: [],
       currentLeftFile: 0,
       currentRightFile: 1
     };
@@ -53,7 +54,7 @@ export default {
         }
     },
     nextTwoPages() {
-        if(this.currentRightFile < this.files.length - 1){
+        if(this.currentRightFile < this.images.length - 1){
             this.currentLeftFile += 2;
             this.currentRightFile += 2;
         }
@@ -69,9 +70,18 @@ export default {
           ],
       }, (directoryPath) => {
           console.log(directoryPath);
+          let re = new RegExp(/^.*?0*(\d+)\.\w+$/);
           let newFiles = fs.readdirSync(directoryPath[0]);
-          newFiles = newFiles.map((fileName) => path.join(directoryPath[0], fileName));
-          this.files = this.files.concat(newFiles);
+          let newImages = newFiles.map((fileName) => {
+            var img = new Image();
+            img.src = path.join(directoryPath[0], fileName);
+            return img;
+          })
+          this.images = _.sortBy(newImages, [(image) => {
+            let it = re.exec(image.src)[1];
+            return parseInt(it);
+            }]);
+            console.log(this.images.map((x) => x.src));
       })
   },
   mounted: function() {

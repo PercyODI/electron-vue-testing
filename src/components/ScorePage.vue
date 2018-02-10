@@ -2,7 +2,7 @@
     <div 
       v-bind:class="classObject" 
       v-bind:style="{height: this.compHeight + 'px', width: this.compWidth + 'px'}">
-            <img :src="imgPath" 
+            <img :src="imgSrc" 
                 alt="" 
                 v-on:click="aClick()"
                 v-on:load="imgLoaded()"
@@ -25,7 +25,7 @@ export default {
     side: String,
     height: Number,
     width: Number,
-    imgPath: String
+    img: Image
   },
   computed: {
     classObject: function() {
@@ -39,6 +39,13 @@ export default {
     },
     compWidth: function() {
       return this.originalWidth * this.scale; 
+    },
+    imgSrc: function() {
+      if(this.img !== undefined) {
+        return this.img.src;
+      } else {
+        return undefined;
+      }
     }
   },
   methods: {
