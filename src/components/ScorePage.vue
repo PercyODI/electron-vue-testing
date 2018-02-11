@@ -1,24 +1,33 @@
 <template>
-    <div 
-      v-bind:class="classObject" 
-      v-bind:style="{height: this.compHeight + 'px', width: this.compWidth + 'px'}">
-            <img :src="imgSrc" 
-                alt="" 
-                v-on:click="aClick()"
-                v-on:load="imgLoaded()"
-                :height="compHeight"
-                :width="compWidth"
-                ref="image">
-    </div>
+  <div 
+    class="position-relative"
+    v-bind:class="classObject" 
+    v-bind:style="{height: this.compHeight + 'px', width: this.compWidth + 'px'}">
+      <img :src="imgSrc" 
+        alt="" 
+        class="position-absolute"
+        v-on:load="imgLoaded()"
+        :height="compHeight"
+        :width="compWidth"
+        ref="image">
+      <svg 
+        id="mySvg"
+        class="position-absolute"
+        :height="compHeight"
+        :width="compWidth"/>
+  </div>
 </template>
 
 <script>
+import SVG from "svg.js";
 export default {
   data: function() {
     return {
       originalHeight: 0,
       originalWidth: 0,
-      scale: 1
+      scale: 1,
+      svgjs: undefined,
+      primaryGroup: undefined
     };
   },
   props: {
@@ -35,13 +44,17 @@ export default {
       };
     },
     compHeight: function() {
-      return this.originalHeight * this.scale;
+      if (isFinite(this.originalHeight) && isFinite(this.scale))
+        return this.originalHeight * this.scale;
+      else return 0;
     },
     compWidth: function() {
-      return this.originalWidth * this.scale; 
+      if (isFinite(this.originalWidth) && isFinite(this.scale))
+        return this.originalWidth * this.scale;
+      else return 0;
     },
     imgSrc: function() {
-      if(this.img !== undefined) {
+      if (this.img !== undefined) {
         return this.img.src;
       } else {
         return undefined;
@@ -49,14 +62,7 @@ export default {
     }
   },
   methods: {
-    aClick() {
-      alert(
-        `OriginalHeight: ${this.originalHeight}. CompHeight: ${this.compHeight}`
-      );
-    },
     imgLoaded() {
-      console.log(this.$refs.image);
-      this.$refs.image.addEventListener;
       this.originalHeight = this.$refs.image.naturalHeight;
       this.originalWidth = this.$refs.image.naturalWidth;
       this.updateScale();
@@ -66,9 +72,18 @@ export default {
         this.height / this.originalHeight,
         this.width / this.originalWidth
       );
+      if (isFinite(this.scale)) this.primaryGroup.scale(this.scale, this.scale);
     }
   },
-  mounted: function() {},
+  mounted: function() {
+    console.log(SVG);
+    let mySvg = SVG("mySvg");
+    console.log(this.svgjs);
+    let group = mySvg.group();
+    group.rect(100, 100).fill("#f03");
+    this.primaryGroup = group;
+    this.svgjs = mySvg;
+  },
   watch: {
     height: function(oldVal, newVal) {
       this.updateScale();
@@ -81,6 +96,15 @@ export default {
 </script>
 
 <style scoped>
+.position-absolute {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+.position-relative {
+  position: relative;
+}
 /* img {
   width: 100%;
   height: 100%;

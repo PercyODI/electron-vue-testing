@@ -72,8 +72,6 @@ export default {
     this.setSize();
     window.addEventListener("resize", this.setSize);
     window.addEventListener("keydown", event => {
-      console.log(event);
-
       switch (event.key) {
         case "ArrowRight":
           this.nextTwoPages();
