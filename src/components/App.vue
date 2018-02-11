@@ -1,110 +1,46 @@
 <template>
-    <div class="flex-col height100 width100">
-        <div class="dev-border">Future Toolbar!</div>
-        <div class="flex-row flex-grow">
-            <div class="dev-border flex-col" ref="toolbarLeft">
-                <div class="dev-border flex-grow">
-                    Tools?
-                </div>
-                <button v-on:click="backTwoPages()">Back</button>
-            </div>
-            <div class="flex-grow flex-row flex-Justify-center width100">
-                <ScorePage class="" side="left" :height="spHeight" :width="spWidth" :img="images[currentLeftFile]" />
-                <ScorePage class="" side="right" :height="spHeight" :width="spWidth" :img="images[currentRightFile]" />
-            </div>
-            <div class="dev-border flex-col" ref="toolbarRight">
-                <div class="dev-border flex-grow">
-                    Tools?
-                </div>
-                <button v-on:click="nextTwoPages()">Next</button>
-            </div>
-        </div>
+<div id="app" class="width100 height100">
+    <div v-if="showStart" class="width100 height100">
+        <StartScreen @showViewScreen="showViewScreen" />
     </div>
+    <div v-if="!showStart" class="width100 height100">
+        <ViewScreen :images="images"/>
+    </div>
+</div>
+
 </template>
 
 <script>
-import * as ScorePage from "./ScorePage.vue";
-import { remote } from "electron";
-import fs from "fs";
-import path from "path";
-import _ from "lodash";
+import StartScreen from "./StartScreen.vue";
+import ViewScreen from "./ViewScreen.vue";
 
 export default {
-  data: function() {
-    return {
-      spHeight: 0,
-      spWidth: 0,
-      images: [],
-      currentLeftFile: 0,
-      currentRightFile: 1
-    };
-  },
-  components: {
-    ScorePage
-  },
-  methods: {
-    setSize() {
-      this.spHeight = this.$refs.toolbarLeft.clientHeight;
-      this.spWidth = (window.innerWidth - this.$refs.toolbarLeft.clientWidth - this.$refs.toolbarRight.clientWidth) / 2;
+    components: {
+        StartScreen, ViewScreen
     },
-    backTwoPages() {
-        if (this.currentLeftFile > 0) {
-            this.currentLeftFile -= 2;
-            this.currentRightFile -= 2;
-        }
+    data: function () {
+        return {
+            showStart: true,
+            images: [],
+        };
     },
-    nextTwoPages() {
-        if(this.currentRightFile < this.images.length - 1){
-            this.currentLeftFile += 2;
-            this.currentRightFile += 2;
+    methods: {
+        toggleShowStart() {
+            this.showStart = !this.showStart;
+        },
+        showViewScreen(images) {
+            console.log(images);
+            if(images !== undefined && Array.isArray(images) && images.length > 0) {
+                this.images = images;
+                this.toggleShowStart();
+            }
         }
     }
-  },
-  created: function() {
-      remote.dialog.showOpenDialog({
-          properties: [
-              "openDirectory"
-          ],
-          filters: [
-              { name: "images", extensions: ["png", "jpg", "gif"]}, 
-          ],
-      }, (directoryPath) => {
-          console.log(directoryPath);
-          let re = new RegExp(/^.*?0*(\d+)\.\w+$/);
-          let newFiles = fs.readdirSync(directoryPath[0]);
-          let newImages = newFiles.map((fileName) => {
-            var img = new Image();
-            img.src = path.join(directoryPath[0], fileName);
-            return img;
-          })
-          this.images = _.sortBy(newImages, [(image) => {
-            let it = re.exec(image.src)[1];
-            return parseInt(it);
-            }]);
-            console.log(this.images.map((x) => x.src));
-      })
-  },
-  mounted: function() {
-    this.setSize();
-    window.addEventListener("resize", this.setSize);
-    window.addEventListener("keydown", (event) => {
-        console.log(event);
-        switch (event.key) {
-            case "ArrowRight":
-                this.nextTwoPages();
-                break;
-            case "ArrowLeft":
-                this.backTwoPages();
-                break;
-            default:
-                break;
-        }
-    });
-  }
 };
+
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .height100 {
   height: 100%;
   max-height: 100%;
@@ -130,7 +66,11 @@ export default {
 }
 
 .flex-Justify-center {
-    justify-content: center;
+  justify-content: center;
+}
+
+.flex-align-center {
+    align-items: center;
 }
 
 .dev-border {
