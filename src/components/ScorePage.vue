@@ -14,7 +14,8 @@
         id="mySvg"
         class="position-absolute"
         :height="compHeight"
-        :width="compWidth"/>
+        :width="compWidth"
+        ref="svg"/>
   </div>
 </template>
 
@@ -72,17 +73,23 @@ export default {
         this.height / this.originalHeight,
         this.width / this.originalWidth
       );
-      if (isFinite(this.scale)) this.primaryGroup.scale(this.scale, this.scale);
+      if (isFinite(this.scale)) this.primaryGroup.transform({scale: this.scale, cx: 0, cy: 0});
     }
   },
   mounted: function() {
     console.log(SVG);
-    let mySvg = SVG("mySvg");
+    let mySvg = SVG(this.$refs.svg);
     console.log(this.svgjs);
     let group = mySvg.group();
-    group.rect(100, 100).fill("#f03");
+    group.rect(100, 100).fill("#f03").x(0).y(0);
     this.primaryGroup = group;
     this.svgjs = mySvg;
+    
+    mySvg.on("click", (evt) => {
+      console.log(evt);
+      let newCircle = mySvg.circle(50).cx(evt.layerX * (1 / this.scale)).cy(evt.layerY * (1 / this.scale));
+      group.add(newCircle);
+    })
   },
   watch: {
     height: function(oldVal, newVal) {
