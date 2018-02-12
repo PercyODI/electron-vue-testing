@@ -69,6 +69,10 @@ export default {
   justify-content: center;
 }
 
+.flex-justify-between {
+    justify-content: space-between;
+}
+
 .flex-align-center {
     align-items: center;
 }

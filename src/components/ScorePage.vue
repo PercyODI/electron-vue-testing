@@ -81,19 +81,21 @@ export default {
     let mySvg = SVG(this.$refs.svg);
     // console.log(this.svgjs);
     let group = mySvg.group();
+    group.id("primaryGroup");
     group.rect(100, 100).fill("#f03").x(0).y(0);
     this.primaryGroup = group;
     this.svgjs = mySvg;
-    mySvg.on("mousemove", (evt) => {
-        // console.log(`clientX: ${evt.clientX}, clientY ${evt.clientY}, layerX: ${evt.layerX}, layerY: ${evt.layerY}`)
-    })
-    mySvg.on("click", (evt) => {
-    //   console.log(mySvg.parent());
-      let clickedX = evt.clientX - mySvg.parent().offsetLeft;
-      let clickedY = evt.clientY - mySvg.parent().offsetTop;
-      let newCircle = mySvg.circle(50).cx(clickedX * (1 / this.scale)).cy(clickedY * (1 / this.scale));
-      group.add(newCircle);
-    })
+    // mySvg.on("mousemove", (evt) => {
+    //     // console.log(`clientX: ${evt.clientX}, clientY ${evt.clientY}, layerX: ${evt.layerX}, layerY: ${evt.layerY}`)
+    // })
+    // mySvg.on("click", (evt) => {
+    // //   console.log(mySvg.parent());
+    //   let clickedX = evt.clientX - mySvg.parent().offsetLeft;
+    //   let clickedY = evt.clientY - mySvg.parent().offsetTop;
+    //   let newCircle = mySvg.circle(50).cx(clickedX * (1 / this.scale)).cy(clickedY * (1 / this.scale));
+    //   group.add(newCircle);
+    // })
+    this.$eventHub.$emit("addSvg", this.svgjs);
   },
   watch: {
     height: function(oldVal, newVal) {

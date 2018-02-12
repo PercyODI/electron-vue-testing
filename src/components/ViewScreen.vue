@@ -2,10 +2,8 @@
     <div class="flex-col height100 width100">
         <div class="dev-border">Future Toolbar!</div>
         <div class="flex-row flex-grow">
-            <div class="dev-border flex-col" ref="toolbarLeft">
-                <div class="dev-border flex-grow">
-                    Tools?
-                </div>
+            <div class="dev-border flex-col flex-justify-between" ref="toolbarLeft">
+                <LeftToolBar />
                 <button v-on:click="backTwoPages()">Back</button>
             </div>
             <div class="flex-grow flex-row flex-Justify-center width100">
@@ -25,6 +23,7 @@
 
 <script>
 import * as ScorePage from "./ScorePage.vue";
+import LeftToolBar from "./LeftToolBar";
 import StartScreen from "./StartScreen.vue";
 
 export default {
@@ -40,7 +39,8 @@ export default {
     images: Array
   },
   components: {
-    ScorePage
+    ScorePage,
+    LeftToolBar
   },
 
   methods: {
