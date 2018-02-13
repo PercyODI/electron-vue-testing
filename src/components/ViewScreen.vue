@@ -21,35 +21,28 @@
 </template>
 
 
-<script>
-import * as ScorePage from "./ScorePage.vue";
-import LeftToolBar from "./LeftToolBar";
+<script lang="ts">
+import { Vue, Component, Prop, Watch } from "vue-property-decorator";
+import ScorePage from "./ScorePage.vue";
+import LeftToolBar from "./LeftToolBar.vue";
 import StartScreen from "./StartScreen.vue";
 
-export default {
-  data: function() {
-    return {
-      spHeight: 0,
-      spWidth: 0,
-      currentLeftFile: 0,
-      currentRightFile: 1
-    };
-  },
-  props: {
-    images: Array
-  },
-  components: {
-    ScorePage,
-    LeftToolBar
-  },
+@Component
+export default class ViewScreen extends Vue {
+  
+      spHeight= 0;
+      spWidth= 0;
+      currentLeftFile= 0;
+      currentRightFile= 1;
+    @Prop() images: HTMLImageElement[];
 
-  methods: {
+  
     setSize() {
       this.spHeight = this.$refs.toolbarLeft.clientHeight;
 
       this.spWidth =
         (window.innerWidth - this.$refs.toolbarLeft.clientWidth - this.$refs.toolbarRight.clientWidth) / 2;
-    },
+    };
 
     backTwoPages() {
       if (this.currentLeftFile > 0) {
@@ -57,7 +50,7 @@ export default {
 
         this.currentRightFile -= 2;
       }
-    },
+    };
 
     nextTwoPages() {
       if (this.currentRightFile < this.images.length - 1) {
@@ -65,10 +58,9 @@ export default {
 
         this.currentRightFile += 2;
       }
-    }
-  },
+    };
 
-  mounted: function() {
+  mounted() {
     this.setSize();
     window.addEventListener("resize", this.setSize);
     window.addEventListener("keydown", event => {
@@ -83,12 +75,12 @@ export default {
           break;
       }
     });
-  },
+  };
 
-  destroyed: function() {
+  destroyed() {
       window.removeEventListener("resize");
       window.removeEventListener("keydown");
-  }
+  };
 };
 </script>
 
