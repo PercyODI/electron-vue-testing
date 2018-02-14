@@ -31,7 +31,7 @@ import * as LeftToolBar from "./LeftToolBar.vue";
   components: {
     LeftToolBar,
     ScorePage
-  }
+  },
 })
 export default class ViewScreen extends Vue {
   spHeight = 0;
