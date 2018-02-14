@@ -25,7 +25,9 @@ import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 import * as SVG from "svg.js";
 import { isNullOrUndefined } from 'util';
 
-@Component
+@Component({
+    name: "ScorePage"
+})
 export default class ScorePage extends Vue {
   originalHeight = 0;
   originalWidth = 0;

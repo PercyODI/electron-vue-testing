@@ -23,65 +23,73 @@
 
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from "vue-property-decorator";
-import ScorePage from "./ScorePage.vue";
-import LeftToolBar from "./LeftToolBar.vue";
-import StartScreen from "./StartScreen.vue";
+import * as ScorePage from "./ScorePage.vue";
+import * as LeftToolBar from "./LeftToolBar.vue";
 
-@Component
+@Component({
+  name: "ViewScreen",
+  components: {
+    LeftToolBar,
+    ScorePage
+  }
+})
 export default class ViewScreen extends Vue {
-  
-      spHeight= 0;
-      spWidth= 0;
-      currentLeftFile= 0;
-      currentRightFile= 1;
-    @Prop() images: HTMLImageElement[];
+  spHeight = 0;
+  spWidth = 0;
+  currentLeftFile = 0;
+  currentRightFile = 1;
+  @Prop() images: HTMLImageElement[];
 
-  
-    setSize() {
-      this.spHeight = this.$refs.toolbarLeft.clientHeight;
+  setSize() {
+    this.spHeight = (this.$refs.toolbarLeft as HTMLElement).clientHeight;
 
-      this.spWidth =
-        (window.innerWidth - this.$refs.toolbarLeft.clientWidth - this.$refs.toolbarRight.clientWidth) / 2;
-    };
+    this.spWidth =
+      (window.innerWidth -
+        (this.$refs.toolbarLeft as HTMLElement).clientWidth -
+        (this.$refs.toolbarRight as HTMLElement).clientWidth) /
+      2;
+  }
 
-    backTwoPages() {
-      if (this.currentLeftFile > 0) {
-        this.currentLeftFile -= 2;
+  backTwoPages() {
+    if (this.currentLeftFile > 0) {
+      this.currentLeftFile -= 2;
 
-        this.currentRightFile -= 2;
-      }
-    };
+      this.currentRightFile -= 2;
+    }
+  }
 
-    nextTwoPages() {
-      if (this.currentRightFile < this.images.length - 1) {
-        this.currentLeftFile += 2;
+  nextTwoPages() {
+    if (this.currentRightFile < this.images.length - 1) {
+      this.currentLeftFile += 2;
 
-        this.currentRightFile += 2;
-      }
-    };
+      this.currentRightFile += 2;
+    }
+  }
+
+  setKeyDownEvent(event: KeyboardEvent) {
+    switch (event.key) {
+      case "ArrowRight":
+        this.nextTwoPages();
+        break;
+      case "ArrowLeft":
+        this.backTwoPages();
+        break;
+      default:
+        break;
+    }
+  }
 
   mounted() {
     this.setSize();
     window.addEventListener("resize", this.setSize);
-    window.addEventListener("keydown", event => {
-      switch (event.key) {
-        case "ArrowRight":
-          this.nextTwoPages();
-          break;
-        case "ArrowLeft":
-          this.backTwoPages();
-          break;
-        default:
-          break;
-      }
-    });
-  };
+    window.addEventListener("keydown", this.setKeyDownEvent);
+  }
 
   destroyed() {
-      window.removeEventListener("resize");
-      window.removeEventListener("keydown");
-  };
-};
+    window.removeEventListener("resize", this.setSize);
+    window.removeEventListener("keydown", this.setKeyDownEvent);
+  }
+}
 </script>
 
 <style scoped>

@@ -10,7 +10,9 @@
 import { Vue, Component } from "vue-property-decorator";
 import SVG from "svg.js";
 
-@Component
+@Component({
+    name: "LeftToolBar"
+})
 export default class LeftToolBar extends Vue {
   currentTool = "FreeDraw";
   affectedSvgs: SVG.Doc[] = [];
