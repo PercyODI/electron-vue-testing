@@ -22,16 +22,17 @@
 
 
 <script lang="ts">
-import { Vue, Component, Prop, Watch } from "vue-property-decorator";
-import * as ScorePage from "./ScorePage.vue";
+import { Vue, Component, Prop} from "vue-property-decorator";
+import ScorePage from "./ScorePage.vue";
 import * as LeftToolBar from "./LeftToolBar.vue";
 
+// @ts-ignore
 @Component({
-  name: "ViewScreen",
   components: {
     LeftToolBar,
     ScorePage
   },
+  name: "ViewScreen",
 })
 export default class ViewScreen extends Vue {
   spHeight = 0;
@@ -39,7 +40,6 @@ export default class ViewScreen extends Vue {
   currentLeftFile = 0;
   currentRightFile = 1;
   @Prop() images: HTMLImageElement[];
-
   setSize() {
     this.spHeight = (this.$refs.toolbarLeft as HTMLElement).clientHeight;
 

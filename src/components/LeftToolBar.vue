@@ -13,7 +13,7 @@ import SVG from "svg.js";
 @Component({
     name: "LeftToolBar"
 })
-export default class LeftToolBar extends Vue {
+class LeftToolBar extends Vue {
   currentTool = "FreeDraw";
   affectedSvgs: SVG.Doc[] = [];
   $eventHub: Vue;
@@ -54,6 +54,8 @@ export default class LeftToolBar extends Vue {
     this.$eventHub.$off("addSvg");
   }
 }
+
+export default LeftToolBar;
 </script>
 
 <style scoped>
