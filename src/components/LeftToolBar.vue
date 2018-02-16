@@ -27,9 +27,14 @@ export class LeftToolBar extends Vue {
     this.updateSvgEvents();
   }
 
+  removeSvg(svg: SVG.Doc) {
+      this.affectedSvgs.filter(x => x != svg);
+      this.updateSvgEvents();
+  }
+
   updateSvgEvents() {
     this.affectedSvgs.forEach(svgjs => {
-      console.log("updateing events " + svgjs);
+      console.log("updating events " + svgjs);
       svgjs.on("click", (evt: MouseEvent) => {
         console.log(evt);
         let primaryGroup: SVG.G = svgjs.get(1) as SVG.G;
