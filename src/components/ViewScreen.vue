@@ -22,11 +22,14 @@
 
 
 <script lang="ts">
+import {Component as vueComp} from "vue";
 import { Vue, Component, Prop} from "vue-property-decorator";
-import ScorePage from "./ScorePage.vue";
-import * as LeftToolBar from "./LeftToolBar.vue";
+import * as scorePageFile from "./ScorePage.vue";
+import * as leftToolBarFile from "./LeftToolBar.vue";
 
-// @ts-ignore
+var LeftToolBar = leftToolBarFile as vueComp<any, any, any, any>;
+var ScorePage = scorePageFile as vueComp<any, any, any, any>;
+
 @Component({
   components: {
     LeftToolBar,
@@ -44,10 +47,7 @@ export default class ViewScreen extends Vue {
     this.spHeight = (this.$refs.toolbarLeft as HTMLElement).clientHeight;
 
     this.spWidth =
-      (window.innerWidth -
-        (this.$refs.toolbarLeft as HTMLElement).clientWidth -
-        (this.$refs.toolbarRight as HTMLElement).clientWidth) /
-      2;
+      (window.innerWidth - (this.$refs.toolbarLeft as HTMLElement).clientWidth - (this.$refs.toolbarRight as HTMLElement).clientWidth) / 2;
   }
 
   backTwoPages() {

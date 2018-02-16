@@ -20,7 +20,7 @@
         "moduleResolution": "node",
         "pretty": true,
         "target": "es2015",
-        "typeRoots": ["./types"]
+        "typeRoots": ["./types", "./node_modules/@types"]
     },
     "formatCodeOptions": {
         "indentSize": 4,

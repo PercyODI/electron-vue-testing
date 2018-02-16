@@ -9,66 +9,65 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { Vue, Component, } from "vue-property-decorator";
 import { remote } from "electron";
-import fs from "fs";
-import path from "path";
-import _ from "lodash";
-export default {
-  data: function() {
-    return {
-      numLoaded: 0,
-      numToLoad: 0,
-      imagesToEmit: [],
-    };
-  },
-  methods: {
-    showTheViewScreen() {
-      this.$emit("showViewScreen", this.imagesToEmit);
-    },
-    checkIfFinished() {
-      if (this.numLoaded >= this.numToLoad) {
-        this.showTheViewScreen();
-      }
-    },
-    openDirectory() {
-      remote.dialog.showOpenDialog(
-        {
-          properties: ["openDirectory"],
-          filters: [
-            {
-              name: "images",
-              extensions: ["png", "jpg", "gif"]
-            }
-          ]
-        },
-        directoryPath => {
-          console.log(directoryPath);
-          let re = new RegExp(/^.*?0*(\d+)\.\w+$/);
-          let newFiles = fs.readdirSync(directoryPath[0]);
-          this.numToLoad = newFiles.length;
-          let newImages = newFiles.map(fileName => {
-            var img = new Image();
-            img.src = path.join(directoryPath[0], fileName);
-            img.addEventListener("load", () => {
-              this.numLoaded++;
-              this.checkIfFinished();
-            });
-            return img;
-          });
+import * as fs from "fs";
+import * as path from "path";
+import * as _ from "lodash";
 
-          let images = _.sortBy(newImages, [
-            image => {
-              let it = re.exec(image.src)[1];
-              return parseInt(it);
-            }
-          ]);
-          this.imagesToEmit = images;
-        }
-      );
+@Component({
+  name: "StartScreen"
+})
+export default class StartScreen extends Vue {
+  numLoaded: number = 0;
+  numToLoad: number = 0;
+  imagesToEmit: HTMLImageElement[] = [];
+  showTheViewScreen() {
+    this.$emit("showViewScreen", this.imagesToEmit);
+  }
+  checkIfFinished() {
+    if (this.numLoaded >= this.numToLoad) {
+      this.showTheViewScreen();
     }
   }
-};
+  openDirectory() {
+    remote.dialog.showOpenDialog(
+      {
+        properties: ["openDirectory"],
+        filters: [
+          {
+            name: "images",
+            extensions: ["png", "jpg", "gif"]
+          }
+        ]
+      },
+      directoryPath => {
+        console.log(directoryPath);
+        const re = new RegExp(/^.*?0*(\d+)\.\w+$/);
+        let newFiles = fs.readdirSync(directoryPath[0]);
+        this.numToLoad = newFiles.length;
+        let newImages = newFiles.map(fileName => {
+          var img = new Image();
+          img.src = path.join(directoryPath[0], fileName);
+          img.addEventListener("load", () => {
+            this.numLoaded++;
+            this.checkIfFinished();
+          });
+          return img;
+        });
+
+        let images = _.sortBy(newImages, 
+          image => {
+            let it = re.exec(image.src)![1];
+            return parseInt(it);
+          }
+        );
+        this.imagesToEmit = images;
+      }
+    );
+  }
+}
 </script>
 
 <style scoped>
