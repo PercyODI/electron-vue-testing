@@ -1,25 +1,48 @@
 <template>
     <div class="flex-col">
-        <button @click="switchToTool('FreeDraw')">Free Draw</button>
-        <button @click="switchToTool('Rectangle')">Rectangle</button>
-        <p> Currently Selected Tool: {{currentTool}}</p>
+        <select v-model="currentTool">
+            <option v-for="tool in toolsList" :key="tool.component.name" :value="tool.component.name">
+                {{tool.displayName}}
+            </option>
+        </select>
+        <component :is="currentTool" />
     </div>
 </template>
 
-<script lang="ts">
-import { Vue, Component } from "vue-property-decorator";
-import SVG from "svg.js";
 
-@Component({
-    name: "LeftToolBar"
+<script lang="ts">
+import { Component } from "vue";
+import { Vue, Component as ComponentDecorator } from "vue-property-decorator";
+import SVG from "svg.js";
+import * as CircleToolFile from "./tools/CircleTool.vue";
+var CircleTool = CircleToolFile as Component<any>;
+
+import * as FreeDrawToolFile from "./tools/FreeDrawTool.vue";
+var FreeDrawTool = FreeDrawToolFile as Component<any>;
+
+export interface ToolbarComponent {
+  displayName: string;
+  component: Component<any>;
+}
+
+@ComponentDecorator({
+  name: "LeftToolBar",
+  components: {
+    CircleTool,
+    FreeDrawTool
+  }
 })
-export class LeftToolBar extends Vue {
-  currentTool = "FreeDraw";
+export default class LeftToolBar extends Vue {
   affectedSvgs: SVG.Doc[] = [];
+  toolsList: ToolbarComponent[] = [
+    { displayName: "Circle Tool", component: CircleTool },
+    { displayName: "Free Draw Tool", component: FreeDrawTool }
+  ];
+  currentTool: string = this.toolsList[1].component.name as string;
   $eventHub: Vue;
 
   switchToTool(toolName: string) {
-    this.currentTool = toolName;
+    this.currentTool = toolName; // = this.toolsList.filter(x => x.name == toolName)[0];
   }
 
   addSvg(svg: SVG.Doc) {
@@ -28,8 +51,8 @@ export class LeftToolBar extends Vue {
   }
 
   removeSvg(svg: SVG.Doc) {
-      this.affectedSvgs.filter(x => x != svg);
-      this.updateSvgEvents();
+    this.affectedSvgs.filter(x => x != svg);
+    this.updateSvgEvents();
   }
 
   updateSvgEvents() {
@@ -56,10 +79,9 @@ export class LeftToolBar extends Vue {
     this.$eventHub.$on("addSvg", this.addSvg);
   }
   beforeDestroy() {
-    this.$eventHub.$off("addSvg");
+    this.$eventHub.$off("addSvg", this.addSvg);
   }
 }
-export default LeftToolBar;
 </script>
 
 <style scoped>
