@@ -5,14 +5,14 @@
                 {{tool.displayName}}
             </option>
         </select>
-        <component :is="currentTool" />
+        <component :is="currentTool" :svgs="affectedSvgs" />
     </div>
 </template>
 
 
 <script lang="ts">
 import { Component } from "vue";
-import { Vue, Component as ComponentDecorator } from "vue-property-decorator";
+import { Vue, Component as ComponentDecorator, Watch } from "vue-property-decorator";
 import SVG from "svg.js";
 import * as CircleToolFile from "./tools/CircleTool.vue";
 var CircleTool = CircleToolFile as Component<any>;
@@ -38,10 +38,11 @@ export default class LeftToolBar extends Vue {
     { displayName: "Circle Tool", component: CircleTool },
     { displayName: "Free Draw Tool", component: FreeDrawTool }
   ];
-  currentTool: string = this.toolsList[1].component.name as string;
+  currentTool: string = ""//this.toolsList[1].component.name as string;
   $eventHub: Vue;
 
   switchToTool(toolName: string) {
+    this.removeAllSvgEvents();
     this.currentTool = toolName; // = this.toolsList.filter(x => x.name == toolName)[0];
   }
 
@@ -55,26 +56,30 @@ export default class LeftToolBar extends Vue {
     this.updateSvgEvents();
   }
 
-  updateSvgEvents() {
-    this.affectedSvgs.forEach(svgjs => {
-      console.log("updating events " + svgjs);
-      svgjs.on("click", (evt: MouseEvent) => {
-        console.log(evt);
-        let primaryGroup: SVG.G = svgjs.get(1) as SVG.G;
-        console.log(primaryGroup);
-        let scale: number = primaryGroup.transform().scaleX as number;
-        //   console.log(mySvg.parent());
-        let clickedX = evt.clientX - svgjs.parent().offsetLeft;
-        let clickedY = evt.clientY - svgjs.parent().offsetTop;
-        let newCircle = svgjs
-          .circle(50)
-          .cx(clickedX * (1 / scale))
-          .cy(clickedY * (1 / scale))
-          .fill("blue");
-        primaryGroup.add(newCircle);
-      });
-    });
+  removeAllSvgEvents() {
+    this.affectedSvgs.forEach(svg => {
+      (svg as any).off();
+      svg.each(function(_, children) {
+        console.log(children);
+        children.forEach(child => {
+          (child as any).off();
+        })
+      }, true)
+    })
   }
+
+  @Watch("currentTool") currentToolChange() {
+    this.removeAllSvgEvents();
+  }
+
+  updateSvg() {
+    this.$emit("svgUpdate");
+  }
+
+  updateSvgEvents() {
+
+  }
+
   created() {
     this.$eventHub.$on("addSvg", this.addSvg);
   }

@@ -1,8 +1,8 @@
 <template>
     <div class="flex-col height100 width100">
-        <div class="dev-border">Future Toolbar!</div>
+        <!-- <div class="dev-border">Future Toolbar!</div> -->
         <div class="flex-row flex-grow">
-            <div class="dev-border flex-col flex-justify-between" ref="toolbarLeft">
+            <div class="dev-border flex-col flex-justify-between width145" ref="toolbarLeft">
                 <LeftToolBar />
                 <button v-on:click="backTwoPages()">Back</button>
             </div>
@@ -93,5 +93,7 @@ export default class ViewScreen extends Vue {
 </script>
 
 <style scoped>
-
+.width145 {
+  width: 145px;
+} 
 </style>
