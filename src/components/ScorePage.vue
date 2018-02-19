@@ -23,28 +23,28 @@
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from "vue-property-decorator";
 import * as SVG from "svg.js";
-import { isNullOrUndefined } from 'util';
+import * as fs from "fs";
+import * as path from "path";
+import { isNullOrUndefined } from "util";
+import { SharedFile } from "../models/SharedFiles";
 
 @Component({
-    name: "ScorePage"
+  name: "ScorePage"
 })
 export default class ScorePage extends Vue {
   originalHeight = 0;
   originalWidth = 0;
   scale = 1;
-  svgjs: SVG.Doc;
-  primaryGroup: SVG.G;
+  svgjs: SVG.Doc | null = null;
   $eventHub: Vue;
 
-  @Prop() side: string;
   @Prop() height: number;
   @Prop() width: number;
-  @Prop() img: HTMLImageElement;
-  get classObject() {
-    return {
-      "sp-left": this.side == "left",
-      "sp-right": this.side == "right"
-    };
+  @Prop() files: SharedFile;
+
+  $refs: {
+    image: HTMLImageElement,
+    svg: HTMLElement
   }
 
   get compHeight() {
@@ -60,16 +60,16 @@ export default class ScorePage extends Vue {
   }
 
   get imgSrc() {
-    if (this.img !== undefined) {
-      return this.img.src;
+    if (this.files.image !== undefined) {
+      return this.files.image.src;
     } else {
       return undefined;
     }
   }
 
   imgLoaded() {
-    this.originalHeight = (this.$refs.image as HTMLImageElement).naturalHeight;
-    this.originalWidth = (this.$refs.image as HTMLImageElement).naturalWidth;
+    this.originalHeight = this.$refs.image.naturalHeight;
+    this.originalWidth = this.$refs.image.naturalWidth;
     this.updateScale();
   }
   updateScale() {
@@ -77,8 +77,10 @@ export default class ScorePage extends Vue {
       this.height / this.originalHeight,
       this.width / this.originalWidth
     );
-    if (isFinite(this.scale) && !isNullOrUndefined(this.primaryGroup))
-      this.primaryGroup.transform({
+    
+    let pGroup = this.buildPrimaryGroup();
+    if (isFinite(this.scale))
+      pGroup.transform({
         scaleX: this.scale,
         scaleY: this.scale,
         cx: 0,
@@ -86,19 +88,72 @@ export default class ScorePage extends Vue {
       });
   }
 
-  mounted() {
-    let mySvg = SVG(this.$refs.svg as HTMLElement);
-    // console.log(this.svgjs);
-    let group = mySvg.group();
-    group.id("primaryGroup");
-    group
-      .rect(100, 100)
-      .fill("#f03")
-      .x(0)
-      .y(0);
-    this.primaryGroup = group;
+  saveSvg() {
+    let parsedImageSrc = path.parse(this.files.image.src);
+    console.log(parsedImageSrc);
+    let svgFilePath = this.files.baseFileName + ".svg";
+    console.log(this.files.baseFileName);
+    console.log(svgFilePath);
+    let pGroup = this.buildPrimaryGroup();
+    let svgBuildString = pGroup.children().reduce((acc, e) => {
+      return acc + e.svg();
+    }, "");
+    this.files.svg = svgBuildString;
+    fs.writeFileSync(svgFilePath, svgBuildString, "utf8");
+  }
+
+  created() {
+    this.$eventHub.$on("saveSvg", this.saveSvg);
+  }
+
+  destroyed() {
+    this.$eventHub.$off("saveSvg", this.saveSvg);
+  }
+
+  buildPrimaryGroup(): SVG.G {
+    let svgjs = this.svgjs;
+    if (isNullOrUndefined(svgjs)) {
+      svgjs = this.buildSvgjs();
+    }
+
+    let primaryGroup;
+    if (svgjs.select("g#primaryGroup").length() > 0) {
+      primaryGroup = svgjs.select("g#primaryGroup").first() as SVG.G;
+    } else {
+      primaryGroup = svgjs.group().id("primaryGroup");
+    }
+    // this.primaryGroup = primaryGroup;
+    return primaryGroup;
+  }
+
+  buildSvgjs(): SVG.Doc {
+    if (isNullOrUndefined(this.svgjs)) {
+      let mySvg = SVG(this.$refs.svg);
+      this.svgjs = mySvg;
+      this.$eventHub.$emit("addSvg", this.svgjs);
+    }
+
+    return this.svgjs;
+  }
+
+  importOrCreateSvg() {
+    let mySvg = this.buildSvgjs();
     this.svgjs = mySvg;
-    this.$eventHub.$emit("addSvg", this.svgjs);
+
+    let primaryGroup = this.buildPrimaryGroup();
+    primaryGroup.clear();
+
+    if (!isNullOrUndefined(this.files.svg) && this.files.svg !== "") {
+      primaryGroup.svg(this.files.svg);
+    }
+  }
+
+  mounted() {
+    this.importOrCreateSvg();
+  }
+
+  beforeUpdate() {
+    this.importOrCreateSvg();
   }
 
   @Watch("height")
@@ -123,13 +178,4 @@ export default class ScorePage extends Vue {
 .position-relative {
   position: relative;
 }
-/* img {
-  width: 100%;
-  height: 100%;
-} */
-
-/* .sp-left {
-        display: flex;
-        justify-content: flex-end;
-    } */
 </style>

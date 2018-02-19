@@ -4,40 +4,44 @@
         <StartScreen @showViewScreen="showViewScreen" />
     </div>
     <div v-if="!showStart" class="width100 height100">
-        <ViewScreen :images="images"/>
+        <ViewScreen :sharedFiles="images"/>
     </div>
 </div>
 
 </template>
 
-<script>
-import StartScreen from "./StartScreen.vue";
-import ViewScreen from "./ViewScreen.vue";
+<script lang="ts">
+import { Component } from "vue";
+import { Vue, Component as ComponentDecorator } from "vue-property-decorator";
+import * as StartScreenFile from "./StartScreen.vue";
+var StartScreen = StartScreenFile as Component<any>;
+import * as ViewScreenFile from "./ViewScreen.vue";
+var ViewScreen = ViewScreenFile as Component<any>;
 
-export default {
-    components: {
-        StartScreen, ViewScreen
-    },
-    data: function () {
-        return {
-            showStart: true,
-            images: [],
-        };
-    },
-    methods: {
-        toggleShowStart() {
-            this.showStart = !this.showStart;
-        },
-        showViewScreen(images) {
-            console.log(images);
-            if(images !== undefined && Array.isArray(images) && images.length > 0) {
-                this.images = images;
-                this.toggleShowStart();
-            }
-        }
+import {SharedFile} from "../models/SharedFiles";
+
+@ComponentDecorator({
+  name: "App",
+  components: {
+    ViewScreen,
+    StartScreen
+  }
+})
+export default class App extends Vue {
+  showStart: boolean = true;
+  images: SharedFile[] = [];
+
+  toggleShowStart() {
+    this.showStart = !this.showStart;
+  }
+
+  showViewScreen(sharedFiles: SharedFile[]) {
+    if (sharedFiles !== undefined && Array.isArray(sharedFiles) && sharedFiles.length > 0) {
+      this.images = sharedFiles;
+      this.toggleShowStart();
     }
-};
-
+  }
+}
 </script>
 
 <style lang="scss">
@@ -70,11 +74,11 @@ export default {
 }
 
 .flex-justify-between {
-    justify-content: space-between;
+  justify-content: space-between;
 }
 
 .flex-align-center {
-    align-items: center;
+  align-items: center;
 }
 
 .dev-border {

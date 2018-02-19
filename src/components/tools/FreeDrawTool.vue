@@ -1,17 +1,23 @@
 <template>
-    <div>
-        <span>Some Free Draw Things Here!</span>
-        <input v-model.number="lineWidth" type="number" />
+<div>
+    <span>Some Free Draw Things Here!</span>
+    <div class="flex-col textSize">
+        <div class="flex-grow flex-align-center text-center">{{lineWidth}}</div>
+        <div class="flex-row">
+            <button class="flex-grow buttonSize" @click="lineWidth++">+</button>
+            <button class="flex-grow buttonSize" @click="lineWidth--">-</button>
+        </div>
+        <svg width="140" height="50">
+        <polyline points="5,5 135,45" stroke="#000000" :stroke-width="lineWidth" fill="none"></polyline>
+        </svg>
     </div>
+</div>
+
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from "vue-property-decorator";
-import {
-  clickedPoint,
-  Point,
-  invertScaleOnPoint
-} from "./ToolUtilities";
+import { clickedPoint, Point, invertScaleOnPoint } from "./ToolUtilities";
 import SVG from "svg.js";
 
 @Component({
@@ -23,6 +29,7 @@ export default class FreeDrawTool extends Vue {
   lineWidth: number = 2;
   currentPoints: Point[] = [];
   currentLines: SVG.Line[] = [];
+  $eventHub: Vue;
 
   @Prop() svgs: SVG.Doc[];
 
@@ -55,15 +62,19 @@ export default class FreeDrawTool extends Vue {
     }
   }
   onMouseUp(svgjs: SVG.Doc) {
-    if (this.isMouseDown) {
+    if (this.currentLines.length > 0) {
       this.convertLinesToPolyline(svgjs);
     }
     this.isMouseDown = false;
     this.currentPoints = [];
     this.currentLines = [];
+    this.$eventHub.$emit("saveSvg");
   }
 
-  onMouseOut() {
+  onMouseOut(svgjs: SVG.Doc) {
+    if (this.currentLines.length > 0) {
+      this.convertLinesToPolyline(svgjs);
+    }
     this.isMouseDown = false;
     this.currentPoints = [];
     this.currentLines = [];
@@ -90,8 +101,10 @@ export default class FreeDrawTool extends Vue {
       svgjs.touchend(() => {
         this.onMouseUp(svgjs);
       });
-      svgjs.on("mouseout", this.onMouseOut);
-      svgjs.touchleave(this.onMouseUp);
+      // svgjs.on("mouseout", () => {
+      //   this.onMouseOut(svgjs);
+      // });
+      // svgjs.touchleave(this.onMouseUp);
     });
   }
 
@@ -101,8 +114,7 @@ export default class FreeDrawTool extends Vue {
     (primaryGroup as any)
       .polyline(
         this.currentPoints.reduce((result, cp, i, array) => {
-          if ( i % 3 == 0 || i >= array.length - 3)
-            result.push([cp.x, cp.y]);
+          if (i % 3 == 0 || i >= array.length - 3) result.push([cp.x, cp.y]);
           return result;
         }, result)
       )
@@ -111,26 +123,6 @@ export default class FreeDrawTool extends Vue {
     this.currentLines.forEach(line => {
       line.remove();
     });
-    // if (this.currentPoints.length > 5) {
-    //   let pathString =
-    //     `M ${this.currentPoints[0].x} ${this.currentPoints[0].y}` +
-    //     ` Q ${this.currentPoints[2].x} ${this.currentPoints[2].y} ${this.currentPoints[5].x} ${this.currentPoints[5].y}`;
-
-    //   for (let i = 7; i < this.currentPoints.length - 2; i += 1) {
-    //     pathString =
-    //       pathString + ` T ${this.currentPoints[i].x} ${this.currentPoints[i].y}`;
-    //   }
-
-    //   console.log(pathString);
-
-    //   primaryGroup
-    //     .path(pathString)
-    //     .stroke({ width: 2 })
-    //     .fill("none");
-    //   this.currentLines.forEach(line => {
-    //     line.remove();
-    //   });
-    // }
   }
 
   mounted() {
@@ -145,5 +137,15 @@ export default class FreeDrawTool extends Vue {
 </script>
 
 <style scoped>
+.textSize {
+  font-size: 24pt;
+}
 
+.buttonSize {
+  font-size: 18pt;
+}
+
+.text-center {
+  text-align: center;
+}
 </style>

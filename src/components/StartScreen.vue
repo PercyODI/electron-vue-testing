@@ -10,11 +10,12 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, } from "vue-property-decorator";
+import { Vue, Component } from "vue-property-decorator";
 import { remote } from "electron";
 import * as fs from "fs";
 import * as path from "path";
 import * as _ from "lodash";
+import { SharedFile } from "../models/SharedFiles";
 
 @Component({
   name: "StartScreen"
@@ -22,48 +23,64 @@ import * as _ from "lodash";
 export default class StartScreen extends Vue {
   numLoaded: number = 0;
   numToLoad: number = 0;
-  imagesToEmit: HTMLImageElement[] = [];
-  showTheViewScreen() {
-    this.$emit("showViewScreen", this.imagesToEmit);
+  filesToEmit: SharedFile[] = [];
+  allowedImageTypes = [".jpg", ".png", ".tiff", ".gif"];
+
+  showTheViewScreen(filesToEmit: SharedFile[]) {
+    this.$emit("showViewScreen", filesToEmit);
   }
+
   checkIfFinished() {
     if (this.numLoaded >= this.numToLoad) {
-      this.showTheViewScreen();
+      this.showTheViewScreen(this.filesToEmit);
     }
   }
   openDirectory() {
     remote.dialog.showOpenDialog(
       {
-        properties: ["openDirectory"],
-        filters: [
-          {
-            name: "images",
-            extensions: ["png", "jpg", "gif"]
-          }
-        ]
+        properties: ["openDirectory"]
       },
       directoryPath => {
         console.log(directoryPath);
         const re = new RegExp(/^.*?0*(\d+)\.\w+$/);
-        let newFiles = fs.readdirSync(directoryPath[0]);
-        this.numToLoad = newFiles.length;
-        let newImages = newFiles.map(fileName => {
+        let foundImageFiles = fs.readdirSync(directoryPath[0]).filter(f => {
+          let doesInclude = _.includes(this.allowedImageTypes, path.extname(f));
+          // console.log(`${f} is found in ${this.allowedImageTypes.reduce((acc, next) => { return acc + " " + next})}: ${doesInclude}`);
+          return doesInclude;
+        });
+        console.log(foundImageFiles);
+        // let foundSvgFiles = fs
+        //   .readdirSync(directoryPath[0])
+        //   .filter(f => path.extname(f).includes(".svg"));
+        this.numToLoad = foundImageFiles.length;
+        let files: SharedFile[] = foundImageFiles.map(fileName => {
+          var filePath = path.join(directoryPath[0], fileName);
           var img = new Image();
-          img.src = path.join(directoryPath[0], fileName);
           img.addEventListener("load", () => {
             this.numLoaded++;
             this.checkIfFinished();
           });
-          return img;
+          img.src = filePath;
+
+          let filePathParsed = path.parse(filePath);
+          let svgFileName = path.join(
+            filePathParsed.dir,
+            filePathParsed.name + ".svg"
+          );
+          var sharedFile: SharedFile = { image: img, baseFileName: path.join(filePathParsed.dir, filePathParsed.name) };
+          if (fs.existsSync(svgFileName)) {
+            let svgString = fs.readFileSync(svgFileName, "utf8");
+            sharedFile.svg = svgString;
+            console.log(svgString);
+          }
+
+          return sharedFile;
         });
 
-        let images = _.sortBy(newImages, 
-          image => {
-            let it = re.exec(image.src)![1];
-            return parseInt(it);
-          }
-        );
-        this.imagesToEmit = images;
+        this.filesToEmit = _.sortBy(files, file => {
+          let it = re.exec(file.image.src)![1];
+          return parseInt(it);
+        });
       }
     );
   }
