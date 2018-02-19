@@ -12,13 +12,20 @@
 
 <script lang="ts">
 import { Component } from "vue";
-import { Vue, Component as ComponentDecorator, Watch } from "vue-property-decorator";
+import {
+  Vue,
+  Component as ComponentDecorator,
+  Watch
+} from "vue-property-decorator";
 import SVG from "svg.js";
 import * as CircleToolFile from "./tools/CircleTool.vue";
 var CircleTool = CircleToolFile as Component<any>;
 
 import * as FreeDrawToolFile from "./tools/FreeDrawTool.vue";
 var FreeDrawTool = FreeDrawToolFile as Component<any>;
+
+import * as MoveToolFile from "./tools/MoveTool.vue";
+var MoveTool = MoveToolFile as Component<any>;
 
 export interface ToolbarComponent {
   displayName: string;
@@ -29,16 +36,18 @@ export interface ToolbarComponent {
   name: "LeftToolBar",
   components: {
     CircleTool,
-    FreeDrawTool
+    FreeDrawTool,
+    MoveTool
   }
 })
 export default class LeftToolBar extends Vue {
   affectedSvgs: SVG.Doc[] = [];
   toolsList: ToolbarComponent[] = [
     { displayName: "Circle Tool", component: CircleTool },
-    { displayName: "Free Draw Tool", component: FreeDrawTool }
+    { displayName: "Free Draw Tool", component: FreeDrawTool },
+    { displayName: "Move Tool", component: MoveTool }
   ];
-  currentTool: string = ""//this.toolsList[1].component.name as string;
+  currentTool: string = ""; //this.toolsList[1].component.name as string;
   $eventHub: Vue;
 
   switchToTool(toolName: string) {
@@ -63,12 +72,13 @@ export default class LeftToolBar extends Vue {
         console.log(children);
         children.forEach(child => {
           (child as any).off();
-        })
-      }, true)
-    })
+        });
+      }, true);
+    });
   }
 
-  @Watch("currentTool") currentToolChange() {
+  @Watch("currentTool")
+  currentToolChange() {
     this.removeAllSvgEvents();
   }
 
@@ -76,9 +86,7 @@ export default class LeftToolBar extends Vue {
     this.$emit("svgUpdate");
   }
 
-  updateSvgEvents() {
-
-  }
+  updateSvgEvents() {}
 
   created() {
     this.$eventHub.$on("addSvg", this.addSvg);
