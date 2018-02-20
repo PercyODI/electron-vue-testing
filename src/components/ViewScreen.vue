@@ -45,6 +45,7 @@ export default class ViewScreen extends Vue {
   
   @Prop() sharedFiles: SharedFile[];
 
+  $eventHub: Vue;
   $refs: {
     toolbarLeft: HTMLElement,
     toolbarRight: HTMLElement
@@ -66,6 +67,7 @@ export default class ViewScreen extends Vue {
 
       this.currentRightFile -= 2;
     }
+    this.$eventHub.$emit("updateSvg");
   }
 
   nextTwoPages() {
@@ -74,6 +76,7 @@ export default class ViewScreen extends Vue {
 
       this.currentRightFile += 2;
     }
+    this.$eventHub.$emit("updateSvg");
   }
 
   setKeyDownEvent(event: KeyboardEvent) {

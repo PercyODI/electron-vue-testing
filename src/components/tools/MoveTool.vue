@@ -5,6 +5,7 @@
 <script lang="ts">
 import { Vue, Component, Prop } from "vue-property-decorator";
 import { clickedPoint, Point, invertScaleOnPoint } from "./ToolUtilities";
+import { isNullOrUndefined } from "util";
 import SVG from "svg.js";
 
 @Component({
@@ -15,9 +16,22 @@ export default class MoveTool extends Vue {
 
   setUpEvents() {
     this.svgs.forEach(svgjs => {
+      let toolGroup: SVG.G = svgjs.select("g#toolGroup").first() as SVG.G;
+      if(!isNullOrUndefined(toolGroup))
+      toolGroup.remove();
+    });
+    this.svgs.forEach(svgjs => {
       let primaryGroup: SVG.G = svgjs.select("g#primaryGroup").first() as SVG.G;
+      let toolGroup = svgjs.group().id("toolGroup");
+      let scale = primaryGroup.transform().scaleX || 1;
+      // toolGroup.transform({ scaleX: scale, scaleY: scale, cx: 0, cy: 0 });
+      let inverseScale = 1 / scale;
       primaryGroup.children().forEach(elem => {
-        elem.rbox();
+        let elemRBox = elem.bbox();
+        let newRBRect = toolGroup
+          .rect(elemRBox.width, elemRBox.height)
+          .move(elemRBox.x, elemRBox.y)
+          .fill({ color: "Blue", opacity: 0.4 });
       });
     });
   }
@@ -25,19 +39,6 @@ export default class MoveTool extends Vue {
   mounted() {
     this.setUpEvents();
     this.$parent.$on("svgUpdate", this.setUpEvents);
-    this.svgs.forEach(svgjs => {
-      let primaryGroup: SVG.G = svgjs.select("g#primaryGroup").first() as SVG.G;
-      let toolGroup = svgjs.group().id("toolGroup");
-      toolGroup.transform(primaryGroup.transform());
-      let inverseScale = 1 / primaryGroup.transform().scaleX;
-      primaryGroup.children().forEach(elem => {
-        let elemRBox = elem.rbox();
-        let newRBRect = toolGroup
-          .rect(elemRBox.width * inverseScale, elemRBox.height * inverseScale)
-          .move(elemRBox.x * inverseScale, elemRBox.y * inverseScale)
-          .fill({ color: "Blue", opacity: 0.4 });
-      });
-    });
   }
 
   destroyed() {

@@ -83,6 +83,7 @@ export default class LeftToolBar extends Vue {
   }
 
   updateSvg() {
+    this.removeAllSvgEvents();
     this.$emit("svgUpdate");
   }
 
@@ -90,6 +91,7 @@ export default class LeftToolBar extends Vue {
 
   created() {
     this.$eventHub.$on("addSvg", this.addSvg);
+    this.$eventHub.$on("updateSvg", this.updateSvg);
   }
   beforeDestroy() {
     this.$eventHub.$off("addSvg", this.addSvg);
