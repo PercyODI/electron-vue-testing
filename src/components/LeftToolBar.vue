@@ -70,14 +70,15 @@ export default class LeftToolBar extends Vue {
     return new Promise((resolve, reject) => {
       try {
         this.affectedSvgs.forEach(svg => {
-          let toolGroup: SVG.G = svg.select("g#toolGroup").first() as SVG.G;
-          if (!isNullOrUndefined(toolGroup)) {
-            console.log("Removing Tool Group");
-            toolGroup.remove();
+          let toolGroups = svg.select("g#toolGroup");
+          if (!isNullOrUndefined(toolGroups)) {
+            console.log(`Removing ${toolGroups.length()} Tool Group(s)`);
+            toolGroups.each((i, array) => array[i].remove());
+            console.log(`Now there are ${svg.select("g#toolGroup").length()} tool groups.`)
           }
           (svg as any).off();
           svg.each(function(_, children) {
-            console.log(children);
+            // console.log(children);
             children.forEach(child => {
               (child as any).off();
             });
@@ -97,7 +98,7 @@ export default class LeftToolBar extends Vue {
 
   updateSvg() {
     this.removeAllSvgEvents().then(() => {
-        console.log("Emitting svgUpdate");
+      console.log("Emitting svgUpdate");
       this.$emit("svgUpdate");
     });
   }

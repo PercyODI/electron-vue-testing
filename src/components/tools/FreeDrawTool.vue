@@ -36,7 +36,7 @@ export default class FreeDrawTool extends Vue {
   onMouseDown(evt: MouseEvent | TouchEvent, svgjs: SVG.Doc) {
     let primaryGroup: SVG.G = svgjs.select("g#primaryGroup").first() as SVG.G;
     let scale: number = primaryGroup.transform().scaleX as number;
-    console.log(evt);
+    // console.log(evt);
     this.isMouseDown = true;
     let point = invertScaleOnPoint(clickedPoint(evt, svgjs), scale);
     this.previousPoint = point;

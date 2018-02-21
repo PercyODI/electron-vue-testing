@@ -151,7 +151,8 @@ export default class ScorePage extends Vue {
     this.$eventHub.$emit("updateSvg");
   }
 
-  beforeUpdate() {
+  updated() {
+    console.log("AfterUpdate!");
     this.importOrCreateSvg();
     this.$eventHub.$emit("updateSvg");
   }
