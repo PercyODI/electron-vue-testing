@@ -18,6 +18,7 @@ import {
   Watch
 } from "vue-property-decorator";
 import SVG from "svg.js";
+import { isNullOrUndefined } from "util";
 import * as CircleToolFile from "./tools/CircleTool.vue";
 var CircleTool = CircleToolFile as Component<any>;
 
@@ -57,23 +58,35 @@ export default class LeftToolBar extends Vue {
 
   addSvg(svg: SVG.Doc) {
     this.affectedSvgs.push(svg);
-    this.updateSvgEvents();
+    // this.updateSvgEvents();
   }
 
   removeSvg(svg: SVG.Doc) {
     this.affectedSvgs.filter(x => x != svg);
-    this.updateSvgEvents();
+    // this.updateSvgEvents();
   }
 
-  removeAllSvgEvents() {
-    this.affectedSvgs.forEach(svg => {
-      (svg as any).off();
-      svg.each(function(_, children) {
-        console.log(children);
-        children.forEach(child => {
-          (child as any).off();
+  removeAllSvgEvents(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      try {
+        this.affectedSvgs.forEach(svg => {
+          let toolGroup: SVG.G = svg.select("g#toolGroup").first() as SVG.G;
+          if (!isNullOrUndefined(toolGroup)) {
+            console.log("Removing Tool Group");
+            toolGroup.remove();
+          }
+          (svg as any).off();
+          svg.each(function(_, children) {
+            console.log(children);
+            children.forEach(child => {
+              (child as any).off();
+            });
+          }, true);
         });
-      }, true);
+        resolve();
+      } catch (e) {
+        reject(e);
+      }
     });
   }
 
@@ -83,11 +96,11 @@ export default class LeftToolBar extends Vue {
   }
 
   updateSvg() {
-    this.removeAllSvgEvents();
-    this.$emit("svgUpdate");
+    this.removeAllSvgEvents().then(() => {
+        console.log("Emitting svgUpdate");
+      this.$emit("svgUpdate");
+    });
   }
-
-  updateSvgEvents() {}
 
   created() {
     this.$eventHub.$on("addSvg", this.addSvg);

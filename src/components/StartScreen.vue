@@ -41,14 +41,14 @@ export default class StartScreen extends Vue {
         properties: ["openDirectory"]
       },
       directoryPath => {
-        console.log(directoryPath);
+        // console.log(directoryPath);
         const re = new RegExp(/^.*?0*(\d+)\.\w+$/);
         let foundImageFiles = fs.readdirSync(directoryPath[0]).filter(f => {
           let doesInclude = _.includes(this.allowedImageTypes, path.extname(f));
           // console.log(`${f} is found in ${this.allowedImageTypes.reduce((acc, next) => { return acc + " " + next})}: ${doesInclude}`);
           return doesInclude;
         });
-        console.log(foundImageFiles);
+        // console.log(foundImageFiles);
         // let foundSvgFiles = fs
         //   .readdirSync(directoryPath[0])
         //   .filter(f => path.extname(f).includes(".svg"));
@@ -71,7 +71,7 @@ export default class StartScreen extends Vue {
           if (fs.existsSync(svgFileName)) {
             let svgString = fs.readFileSync(svgFileName, "utf8");
             sharedFile.svg = svgString;
-            console.log(svgString);
+            // console.log(svgString);
           }
 
           return sharedFile;

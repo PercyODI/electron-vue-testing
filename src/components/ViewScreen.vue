@@ -67,7 +67,7 @@ export default class ViewScreen extends Vue {
 
       this.currentRightFile -= 2;
     }
-    this.$eventHub.$emit("updateSvg");
+    // this.$eventHub.$emit("updateSvg");
   }
 
   nextTwoPages() {
@@ -76,7 +76,7 @@ export default class ViewScreen extends Vue {
 
       this.currentRightFile += 2;
     }
-    this.$eventHub.$emit("updateSvg");
+    // this.$eventHub.$emit("updateSvg");
   }
 
   setKeyDownEvent(event: KeyboardEvent) {

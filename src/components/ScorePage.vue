@@ -43,9 +43,9 @@ export default class ScorePage extends Vue {
   @Prop() files: SharedFile;
 
   $refs: {
-    image: HTMLImageElement,
-    svg: HTMLElement
-  }
+    image: HTMLImageElement;
+    svg: HTMLElement;
+  };
 
   get compHeight() {
     if (isFinite(this.originalHeight) && isFinite(this.scale))
@@ -77,7 +77,7 @@ export default class ScorePage extends Vue {
       this.height / this.originalHeight,
       this.width / this.originalWidth
     );
-    
+
     let pGroup = this.buildPrimaryGroup();
     if (isFinite(this.scale))
       pGroup.transform({
@@ -137,9 +137,7 @@ export default class ScorePage extends Vue {
   }
 
   importOrCreateSvg() {
-    let mySvg = this.buildSvgjs();
-    this.svgjs = mySvg;
-
+    this.buildSvgjs();
     let primaryGroup = this.buildPrimaryGroup();
     primaryGroup.clear();
 
@@ -150,10 +148,12 @@ export default class ScorePage extends Vue {
 
   mounted() {
     this.importOrCreateSvg();
+    this.$eventHub.$emit("updateSvg");
   }
 
   beforeUpdate() {
     this.importOrCreateSvg();
+    this.$eventHub.$emit("updateSvg");
   }
 
   @Watch("height")

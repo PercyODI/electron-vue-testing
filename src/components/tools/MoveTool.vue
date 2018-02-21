@@ -15,19 +15,20 @@ export default class MoveTool extends Vue {
   @Prop() svgs: SVG.Doc[];
 
   setUpEvents() {
+    console.log("Setting up Move Tool Events");
     this.svgs.forEach(svgjs => {
-      let toolGroup: SVG.G = svgjs.select("g#toolGroup").first() as SVG.G;
-      if(!isNullOrUndefined(toolGroup))
-      toolGroup.remove();
-    });
-    this.svgs.forEach(svgjs => {
+      if (svgjs.select("g#toolGroup").length() > 0) {
+        console.log("Tool Goup still exists?!?!");
+      }
       let primaryGroup: SVG.G = svgjs.select("g#primaryGroup").first() as SVG.G;
+      console.log("SetUpEvents For Move");
+    //   console.log(primaryGroup.svg());
       let toolGroup = svgjs.group().id("toolGroup");
-      let scale = primaryGroup.transform().scaleX || 1;
+      //   let scale = primaryGroup.transform().scaleX || 1;
       // toolGroup.transform({ scaleX: scale, scaleY: scale, cx: 0, cy: 0 });
-      let inverseScale = 1 / scale;
+      //   let inverseScale = 1 / scale;
       primaryGroup.children().forEach(elem => {
-        let elemRBox = elem.bbox();
+        let elemRBox = elem.rbox(svgjs);
         let newRBRect = toolGroup
           .rect(elemRBox.width, elemRBox.height)
           .move(elemRBox.x, elemRBox.y)
@@ -37,15 +38,19 @@ export default class MoveTool extends Vue {
   }
 
   mounted() {
+    console.log("Mounting MoveTool");
     this.setUpEvents();
     this.$parent.$on("svgUpdate", this.setUpEvents);
   }
 
   destroyed() {
+    console.log("Destroying MoveTool");
     this.$parent.$on("svgUpdate", this.setUpEvents);
     this.svgs.forEach(svgjs => {
       let toolGroup: SVG.G = svgjs.select("g#toolGroup").first() as SVG.G;
-      toolGroup.remove();
+      if (!isNullOrUndefined(toolGroup)) {
+        toolGroup.remove();
+      }
     });
   }
 }
