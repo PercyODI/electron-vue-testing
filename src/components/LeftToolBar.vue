@@ -52,7 +52,6 @@ export default class LeftToolBar extends Vue {
   $eventHub: Vue;
 
   switchToTool(toolName: string) {
-    this.removeAllSvgEvents();
     this.currentTool = toolName; // = this.toolsList.filter(x => x.name == toolName)[0];
   }
 
@@ -66,24 +65,24 @@ export default class LeftToolBar extends Vue {
     // this.updateSvgEvents();
   }
 
-  removeAllSvgEvents(): Promise<any> {
+  removeAllSvgEvents(svgjs: SVG.Doc): Promise<any> {
     return new Promise((resolve, reject) => {
       try {
-        this.affectedSvgs.forEach(svg => {
-          let toolGroups = svg.select("g#toolGroup");
-          if (!isNullOrUndefined(toolGroups)) {
-            console.log(`Removing ${toolGroups.length()} Tool Group(s)`);
-            toolGroups.each((i, array) => array[i].remove());
-            console.log(`Now there are ${svg.select("g#toolGroup").length()} tool groups.`)
-          }
-          (svg as any).off();
-          svg.each(function(_, children) {
-            // console.log(children);
-            children.forEach(child => {
-              (child as any).off();
-            });
-          }, true);
-        });
+        let toolGroups = svgjs.select("g#toolGroup");
+        if (!isNullOrUndefined(toolGroups)) {
+          console.log(`Removing ${toolGroups.length()} Tool Group(s)`);
+          toolGroups.each((i, array) => array[i].remove());
+          console.log(
+            `Now there are ${svgjs.select("g#toolGroup").length()} tool groups.`
+          );
+        }
+        (svgjs as any).off();
+        svgjs.each(function(_, children) {
+          // console.log(children);
+          children.forEach(child => {
+            (child as any).off();
+          });
+        }, true);
         resolve();
       } catch (e) {
         reject(e);
@@ -93,13 +92,15 @@ export default class LeftToolBar extends Vue {
 
   @Watch("currentTool")
   currentToolChange() {
-    this.removeAllSvgEvents();
+    this.affectedSvgs.forEach(svgjs => {
+      this.removeAllSvgEvents(svgjs);
+    });
   }
 
-  updateSvg() {
-    this.removeAllSvgEvents().then(() => {
+  updateSvg(svgjs: SVG.Doc) {
+    this.removeAllSvgEvents(svgjs).then(() => {
       console.log("Emitting svgUpdate");
-      this.$emit("svgUpdate");
+      this.$emit("setUpEvents", svgjs);
     });
   }
 

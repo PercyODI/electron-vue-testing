@@ -72,7 +72,9 @@ export default class ScorePage extends Vue {
     this.originalWidth = this.$refs.image.naturalWidth;
     this.updateScale();
   }
+
   updateScale() {
+    console.log("Updating Scale");
     this.scale = Math.min(
       this.height / this.originalHeight,
       this.width / this.originalWidth
@@ -147,23 +149,27 @@ export default class ScorePage extends Vue {
   }
 
   mounted() {
+    console.log("Mounting ScorePage")
     this.importOrCreateSvg();
-    this.$eventHub.$emit("updateSvg");
+    this.$eventHub.$emit("updateSvg", this.svgjs);
   }
 
   updated() {
-    console.log("AfterUpdate!");
+    console.log("ScorePage Updated");
+    this.updateScale();
     this.importOrCreateSvg();
-    this.$eventHub.$emit("updateSvg");
+    this.$eventHub.$emit("updateSvg", this.svgjs);
   }
 
   @Watch("height")
   watchingHeight() {
+    // console.log("Watching Height Change!")
     this.updateScale();
   }
 
   @Watch("width")
   watchingWidth() {
+    // console.log("Watching Width Change!")
     this.updateScale();
   }
 }

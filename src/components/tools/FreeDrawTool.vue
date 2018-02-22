@@ -80,8 +80,7 @@ export default class FreeDrawTool extends Vue {
     this.currentLines = [];
   }
 
-  setUpEvents() {
-    this.svgs.forEach(svgjs => {
+  setUpEvents(svgjs: SVG.Doc) {
       // let primaryGroup: SVG.G = svgjs.select("g#primaryGroup").first() as SVG.G;
       svgjs.touchstart((evt: TouchEvent) => {
         this.onMouseDown(evt, svgjs);
@@ -105,7 +104,6 @@ export default class FreeDrawTool extends Vue {
       //   this.onMouseOut(svgjs);
       // });
       // svgjs.touchleave(this.onMouseUp);
-    });
   }
 
   convertLinesToPolyline(svgjs: SVG.Doc) {
@@ -126,12 +124,12 @@ export default class FreeDrawTool extends Vue {
   }
 
   mounted() {
-    this.setUpEvents();
-    this.$parent.$on("svgUpdate", this.setUpEvents);
+    this.svgs.forEach(svgjs => this.setUpEvents(svgjs));
+    this.$parent.$on("setUpEvents", this.setUpEvents);
   }
 
   destroyed() {
-    this.$parent.$off("svgUpdate", this.setUpEvents);
+    this.$parent.$off("setUpEvents", this.setUpEvents);
   }
 }
 </script>
