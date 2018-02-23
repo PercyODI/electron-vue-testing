@@ -19,6 +19,7 @@
 import { Vue, Component, Prop } from "vue-property-decorator";
 import { clickedPoint, Point, invertScaleOnPoint } from "./ToolUtilities";
 import SVG from "svg.js";
+import {EventHub} from "../EventHub";
 
 @Component({
   name: "FreeDrawTool"
@@ -29,7 +30,7 @@ export default class FreeDrawTool extends Vue {
   lineWidth: number = 2;
   currentPoints: Point[] = [];
   currentLines: SVG.Line[] = [];
-  $eventHub: Vue;
+  $eventHub: EventHub;
 
   @Prop() svgs: SVG.Doc[];
 
@@ -68,7 +69,7 @@ export default class FreeDrawTool extends Vue {
     this.isMouseDown = false;
     this.currentPoints = [];
     this.currentLines = [];
-    this.$eventHub.$emit("saveSvg");
+    this.$eventHub.saveSvg();
   }
 
   onMouseOut(svgjs: SVG.Doc) {

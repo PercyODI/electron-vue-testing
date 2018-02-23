@@ -34,3 +34,10 @@ export function clickedPoint(evt: MouseEvent | TouchEvent, svgjs: SVG.Doc): Poin
         y: clickedY
     }
 }
+
+export function primaryGroupScale(svgjs: SVG.Doc): number {
+    let primaryGroup: SVG.G = svgjs.select("g#primaryGroup").first() as SVG.G;
+    let scale: number = primaryGroup.transform().scaleX as number
+
+    return scale
+}

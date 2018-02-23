@@ -27,6 +27,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { isNullOrUndefined } from "util";
 import { SharedFile } from "../models/SharedFiles";
+import {EventHub} from "./EventHub";
 
 @Component({
   name: "ScorePage"
@@ -36,7 +37,7 @@ export default class ScorePage extends Vue {
   originalWidth = 0;
   scale = 1;
   svgjs: SVG.Doc | null = null;
-  $eventHub: Vue;
+  $eventHub: EventHub;
 
   @Prop() height: number;
   @Prop() width: number;
@@ -68,6 +69,7 @@ export default class ScorePage extends Vue {
   }
 
   imgLoaded() {
+      console.log("Image Loaded");
     this.originalHeight = this.$refs.image.naturalHeight;
     this.originalWidth = this.$refs.image.naturalWidth;
     this.updateScale();
@@ -104,14 +106,6 @@ export default class ScorePage extends Vue {
     fs.writeFileSync(svgFilePath, svgBuildString, "utf8");
   }
 
-  created() {
-    this.$eventHub.$on("saveSvg", this.saveSvg);
-  }
-
-  destroyed() {
-    this.$eventHub.$off("saveSvg", this.saveSvg);
-  }
-
   buildPrimaryGroup(): SVG.G {
     let svgjs = this.svgjs;
     if (isNullOrUndefined(svgjs)) {
@@ -124,7 +118,6 @@ export default class ScorePage extends Vue {
     } else {
       primaryGroup = svgjs.group().id("primaryGroup");
     }
-    // this.primaryGroup = primaryGroup;
     return primaryGroup;
   }
 
@@ -132,44 +125,54 @@ export default class ScorePage extends Vue {
     if (isNullOrUndefined(this.svgjs)) {
       let mySvg = SVG(this.$refs.svg);
       this.svgjs = mySvg;
-      this.$eventHub.$emit("addSvg", this.svgjs);
+      this.$eventHub.addSvg(this.svgjs);
     }
 
     return this.svgjs;
   }
 
-  importOrCreateSvg() {
-    this.buildSvgjs();
+  importOrCreateSvg(): SVG.Doc {
+    let svg = this.buildSvgjs();
     let primaryGroup = this.buildPrimaryGroup();
     primaryGroup.clear();
 
     if (!isNullOrUndefined(this.files.svg) && this.files.svg !== "") {
       primaryGroup.svg(this.files.svg);
     }
+    if(isNullOrUndefined(svg)) {
+        console.log("svg in importOrCreateSvg is null....")
+    }
+    return svg;
+  }
+
+  created() {
+    this.$eventHub.onSaveSvgListener(this.saveSvg);
+  }
+
+  destroyed() {
+    this.$eventHub.offSaveSvgListener(this.saveSvg);
   }
 
   mounted() {
     console.log("Mounting ScorePage")
-    this.importOrCreateSvg();
-    this.$eventHub.$emit("updateSvg", this.svgjs);
+    let svgjs = this.importOrCreateSvg();
+    this.$eventHub.updateSvg(svgjs);
   }
 
   updated() {
     console.log("ScorePage Updated");
     this.updateScale();
-    this.importOrCreateSvg();
-    this.$eventHub.$emit("updateSvg", this.svgjs);
+    let svgjs = this.importOrCreateSvg();
+    this.$eventHub.updateSvg(svgjs);
   }
 
   @Watch("height")
   watchingHeight() {
-    // console.log("Watching Height Change!")
     this.updateScale();
   }
 
   @Watch("width")
   watchingWidth() {
-    // console.log("Watching Width Change!")
     this.updateScale();
   }
 }

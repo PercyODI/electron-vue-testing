@@ -19,6 +19,7 @@ import {
 } from "vue-property-decorator";
 import SVG from "svg.js";
 import { isNullOrUndefined } from "util";
+import { EventHub } from "./EventHub";
 import * as CircleToolFile from "./tools/CircleTool.vue";
 var CircleTool = CircleToolFile as Component<any>;
 
@@ -48,21 +49,19 @@ export default class LeftToolBar extends Vue {
     { displayName: "Free Draw Tool", component: FreeDrawTool },
     { displayName: "Move Tool", component: MoveTool }
   ];
-  currentTool: string = ""; //this.toolsList[1].component.name as string;
-  $eventHub: Vue;
+  currentTool: string = "";
+  $eventHub: EventHub;
 
   switchToTool(toolName: string) {
-    this.currentTool = toolName; // = this.toolsList.filter(x => x.name == toolName)[0];
+    this.currentTool = toolName;
   }
 
   addSvg(svg: SVG.Doc) {
     this.affectedSvgs.push(svg);
-    // this.updateSvgEvents();
   }
 
   removeSvg(svg: SVG.Doc) {
     this.affectedSvgs.filter(x => x != svg);
-    // this.updateSvgEvents();
   }
 
   removeAllSvgEvents(svgjs: SVG.Doc): Promise<any> {
@@ -105,11 +104,13 @@ export default class LeftToolBar extends Vue {
   }
 
   created() {
-    this.$eventHub.$on("addSvg", this.addSvg);
-    this.$eventHub.$on("updateSvg", this.updateSvg);
+    this.$eventHub.onAddSvgListener(this.addSvg);
+    this.$eventHub.onUpdateSvgListener(this.updateSvg);
   }
+
   beforeDestroy() {
-    this.$eventHub.$off("addSvg", this.addSvg);
+    this.$eventHub.offAddSvgListener(this.addSvg);
+    this.$eventHub.offUpdateSvgListener(this.updateSvg);
   }
 }
 </script>

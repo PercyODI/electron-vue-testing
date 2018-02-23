@@ -13,7 +13,9 @@ const createWindow = async () => {
     window = new BrowserWindow({
         darkTheme: true,
         width: 1024,
-        height: 768
+        height: 768,
+        minWidth: 300,
+        minHeight: 150
     })
     window.loadURL(`file://${__dirname}/index.jade`)
     window.setAutoHideMenuBar(true)
