@@ -27,8 +27,14 @@ export interface ToolGroup {
 export default class TransformTool extends Vue {
   allGroups: ToolGroup[] = [];
   currGroup: ToolGroup | null = null;
+  mouseDownPoints: {
+      realElemPoint: number;
+      rboxElemPoint: number;
+      toolContainerPoint: number;
+  }
   mouseDownClickedPoint: Point | null = null;
   mouseDownElemPoint: Point | null = null;
+  transformToolOffset: number = 3;
 
   mouseDown: Boolean = false;
   $eventHub: EventHub;
@@ -60,6 +66,7 @@ export default class TransformTool extends Vue {
       !isNullOrUndefined(this.currGroup.toolContainer)
     ) {
       let mousePoint = clickedPoint(evt, svgjs);
+
       this.currGroup.toolContainer.x(
         this.mouseDownElemPoint.x +
           (mousePoint.x - this.mouseDownClickedPoint.x)
@@ -69,11 +76,20 @@ export default class TransformTool extends Vue {
           (mousePoint.y - this.mouseDownClickedPoint.y)
       );
 
+      this.currGroup.rboxElem.x(
+        this.mouseDownElemPoint.x +
+          (mousePoint.x - this.mouseDownClickedPoint.x)
+      );
+      this.currGroup.rboxElem.y(
+        this.mouseDownElemPoint.y +
+          (mousePoint.y - this.mouseDownClickedPoint.y)
+      );
+
       let scale = primaryGroupScale(svgjs);
       let newRealElemPoint = invertScaleOnPoint(
         {
-          x: this.currGroup.toolContainer.x(),
-          y: this.currGroup.toolContainer.y()
+          x: this.currGroup.rboxElem.x(),
+          y: this.currGroup.rboxElem.y()
         },
         scale
       );
@@ -115,7 +131,7 @@ export default class TransformTool extends Vue {
         .rect(elemRBox.width, elemRBox.height)
         .move(elemRBox.x, elemRBox.y)
         // .fill("none");
-      .fill({ color: "Blue", opacity: 0.01 });
+        .fill({ color: "Blue", opacity: 0.2 });
       let thisGroup: ToolGroup = {
         realElem: elem,
         rboxElem: newRBRect,
@@ -132,10 +148,16 @@ export default class TransformTool extends Vue {
     this.clearCurrToolGroup();
     let transformTool = group.toolGroup.group();
     let boundingBox = transformTool
-      .rect(group.rboxElem.width() + 6, group.rboxElem.height() + 6)
-      .move(group.rboxElem.x() - 3, group.rboxElem.y() - 3)
+      .rect(
+        group.rboxElem.width() + this.transformToolOffset * 2,
+        group.rboxElem.height() + this.transformToolOffset * 2
+      )
+      .move(
+        group.rboxElem.x() - this.transformToolOffset * 2,
+        group.rboxElem.y() - this.transformToolOffset * 2
+      )
       .stroke({ dasharray: "5, 10", color: "black" })
-      .fill({ color: "Blue", opacity: 0.01 });
+      .fill({ color: "Red", opacity: 0.2 });
 
     let topLeftCircle = transformTool.add(
       this.buildToolCircle(boundingBox.x(), boundingBox.y())
@@ -173,7 +195,7 @@ export default class TransformTool extends Vue {
 
     boundingBox.mouseup(() => {
       this.moveOnMouseUp();
-    })
+    });
   }
 
   clearCurrToolGroup() {
