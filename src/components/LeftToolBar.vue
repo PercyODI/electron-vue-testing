@@ -29,6 +29,9 @@ var FreeDrawTool = FreeDrawToolFile as Component<any>;
 import * as MoveToolFile from "./tools/MoveTool.vue";
 var MoveTool = MoveToolFile as Component<any>;
 
+import * as TransformToolFile from "./tools/TransformTool.vue";
+var TransformTool = TransformToolFile as Component<any>;
+
 export interface ToolbarComponent {
   displayName: string;
   component: Component<any>;
@@ -39,7 +42,8 @@ export interface ToolbarComponent {
   components: {
     CircleTool,
     FreeDrawTool,
-    MoveTool
+    MoveTool,
+    TransformTool
   }
 })
 export default class LeftToolBar extends Vue {
@@ -48,6 +52,7 @@ export default class LeftToolBar extends Vue {
     { displayName: "Circle Tool", component: CircleTool },
     { displayName: "Free Draw Tool", component: FreeDrawTool },
     { displayName: "Move Tool", component: MoveTool }
+    { displayName: "Transform Tool", component: TransformTool }
   ];
   currentTool: string = "";
   $eventHub: EventHub;

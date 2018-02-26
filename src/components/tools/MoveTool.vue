@@ -82,7 +82,7 @@ export default class MoveTool extends Vue {
     }
   }
 
-  onMouseUp(evt: MouseEvent | TouchEvent) {
+  onMouseUp() {
     this.mouseDown = false;
     this.currPair = null;
     this.mouseDownClickedPoint = null;
@@ -118,8 +118,8 @@ export default class MoveTool extends Vue {
       newRBRect.mousemove((evt: MouseEvent) => {
         this.onMouseMove(evt, svgjs);
       });
-      svgjs.mouseup((evt: MouseEvent) => {
-        this.onMouseUp(evt);
+      svgjs.mouseup(() => {
+        this.onMouseUp();
       });
       this.elements.push(thisPair);
     });
