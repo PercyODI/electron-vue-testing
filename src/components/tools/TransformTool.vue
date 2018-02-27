@@ -28,12 +28,12 @@ export default class TransformTool extends Vue {
   allGroups: ToolGroup[] = [];
   currGroup: ToolGroup | null = null;
   mouseDownPoints: {
-      realElemPoint: number;
-      rboxElemPoint: number;
-      toolContainerPoint: number;
-  }
+    realElemPoint: Point;
+    rboxElemPoint: Point;
+    toolContainerPoint: Point;
+  } | null = null;
   mouseDownClickedPoint: Point | null = null;
-  mouseDownElemPoint: Point | null = null;
+  // mouseDownElemPoint: Point | null = null;
   transformToolOffset: number = 3;
 
   mouseDown: Boolean = false;
@@ -50,9 +50,22 @@ export default class TransformTool extends Vue {
       this.currGroup = group;
       this.mouseDown = true;
       this.mouseDownClickedPoint = clickedPoint(evt, svgjs);
-      this.mouseDownElemPoint = {
+      let realElemPoint = {
+        x: group.realElem.x(),
+        y: group.realElem.y()
+      };
+      let rboxElemPoint = {
+        x: group.rboxElem.x(),
+        y: group.rboxElem.y()
+      };
+      let toolContainerPoint = {
         x: group.toolContainer.x(),
         y: group.toolContainer.y()
+      };
+      this.mouseDownPoints = {
+        realElemPoint,
+        rboxElemPoint,
+        toolContainerPoint
       };
     }
   }
@@ -62,29 +75,32 @@ export default class TransformTool extends Vue {
       this.mouseDown &&
       !isNullOrUndefined(this.currGroup) &&
       !isNullOrUndefined(this.mouseDownClickedPoint) &&
-      !isNullOrUndefined(this.mouseDownElemPoint) &&
-      !isNullOrUndefined(this.currGroup.toolContainer)
+      !isNullOrUndefined(this.currGroup.toolContainer) &&
+      !isNullOrUndefined(this.mouseDownPoints)
     ) {
       let mousePoint = clickedPoint(evt, svgjs);
 
+      // Tool Container
       this.currGroup.toolContainer.x(
-        this.mouseDownElemPoint.x +
+        this.mouseDownPoints.toolContainerPoint.x +
           (mousePoint.x - this.mouseDownClickedPoint.x)
       );
       this.currGroup.toolContainer.y(
-        this.mouseDownElemPoint.y +
+        this.mouseDownPoints.toolContainerPoint.y +
           (mousePoint.y - this.mouseDownClickedPoint.y)
       );
 
+      // RBox
       this.currGroup.rboxElem.x(
-        this.mouseDownElemPoint.x +
+        this.mouseDownPoints.rboxElemPoint.x +
           (mousePoint.x - this.mouseDownClickedPoint.x)
       );
       this.currGroup.rboxElem.y(
-        this.mouseDownElemPoint.y +
+        this.mouseDownPoints.rboxElemPoint.y +
           (mousePoint.y - this.mouseDownClickedPoint.y)
       );
 
+      // Set real element based on RBox location
       let scale = primaryGroupScale(svgjs);
       let newRealElemPoint = invertScaleOnPoint(
         {
@@ -95,21 +111,13 @@ export default class TransformTool extends Vue {
       );
       this.currGroup.realElem.x(newRealElemPoint.x);
       this.currGroup.realElem.y(newRealElemPoint.y);
-
-      console.log(
-        "Moving from " +
-          JSON.stringify(this.mouseDownClickedPoint) +
-          " to " +
-          JSON.stringify(mousePoint)
-      );
     }
   }
 
   moveOnMouseUp() {
     this.mouseDown = false;
-    this.currGroup = null;
     this.mouseDownClickedPoint = null;
-    this.mouseDownElemPoint = null;
+    this.mouseDownPoints = null;
     this.$eventHub.saveSvg();
   }
 
@@ -145,6 +153,8 @@ export default class TransformTool extends Vue {
   }
 
   clickedRbox(evt: MouseEvent | TouchEvent, group: ToolGroup, svgjs: SVG.Doc) {
+    svgjs.off("mousemove.transformTool");
+    svgjs.off("mouseup.transformTool");
     this.clearCurrToolGroup();
     let transformTool = group.toolGroup.group();
     let boundingBox = transformTool
@@ -153,8 +163,8 @@ export default class TransformTool extends Vue {
         group.rboxElem.height() + this.transformToolOffset * 2
       )
       .move(
-        group.rboxElem.x() - this.transformToolOffset * 2,
-        group.rboxElem.y() - this.transformToolOffset * 2
+        group.rboxElem.x() - this.transformToolOffset,
+        group.rboxElem.y() - this.transformToolOffset
       )
       .stroke({ dasharray: "5, 10", color: "black" })
       .fill({ color: "Red", opacity: 0.2 });
@@ -185,15 +195,15 @@ export default class TransformTool extends Vue {
     this.currGroup = group;
 
     // Setup events for the new Transform Tool elements
-    boundingBox.mousedown((evt: MouseEvent) => {
+    boundingBox.on("mousedown.transformTool", (evt: MouseEvent) => {
       this.moveOnMouseDown(evt, group, svgjs);
     });
 
-    boundingBox.mousemove((evt: MouseEvent) => {
+    svgjs.on("mousemove.transformTool", (evt: MouseEvent) => {
       this.moveOnMouseMove(evt, svgjs);
     });
 
-    boundingBox.mouseup(() => {
+    svgjs.on("mouseup.transformTool", () => {
       this.moveOnMouseUp();
     });
   }
@@ -205,7 +215,9 @@ export default class TransformTool extends Vue {
     ) {
       return;
     }
+    this.currGroup.toolContainer.off();
     this.currGroup.toolContainer.remove();
+
   }
 
   buildToolCircle(cx: number, cy: number) {
