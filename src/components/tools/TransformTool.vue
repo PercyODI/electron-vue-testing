@@ -27,7 +27,7 @@ export interface ToolGroup {
 export default class TransformTool extends Vue {
   allGroups: ToolGroup[] = [];
   currGroup: ToolGroup | null = null;
-  mouseDownPoints: {
+  moveMouseDownPoints: {
     realElemPoint: Point;
     rboxElemPoint: Point;
     toolContainerPoint: Point;
@@ -62,7 +62,7 @@ export default class TransformTool extends Vue {
         x: group.toolContainer.x(),
         y: group.toolContainer.y()
       };
-      this.mouseDownPoints = {
+      this.moveMouseDownPoints = {
         realElemPoint,
         rboxElemPoint,
         toolContainerPoint
@@ -76,27 +76,27 @@ export default class TransformTool extends Vue {
       !isNullOrUndefined(this.currGroup) &&
       !isNullOrUndefined(this.mouseDownClickedPoint) &&
       !isNullOrUndefined(this.currGroup.toolContainer) &&
-      !isNullOrUndefined(this.mouseDownPoints)
+      !isNullOrUndefined(this.moveMouseDownPoints)
     ) {
       let mousePoint = clickedPoint(evt, svgjs);
 
       // Tool Container
       this.currGroup.toolContainer.x(
-        this.mouseDownPoints.toolContainerPoint.x +
+        this.moveMouseDownPoints.toolContainerPoint.x +
           (mousePoint.x - this.mouseDownClickedPoint.x)
       );
       this.currGroup.toolContainer.y(
-        this.mouseDownPoints.toolContainerPoint.y +
+        this.moveMouseDownPoints.toolContainerPoint.y +
           (mousePoint.y - this.mouseDownClickedPoint.y)
       );
 
       // RBox
       this.currGroup.rboxElem.x(
-        this.mouseDownPoints.rboxElemPoint.x +
+        this.moveMouseDownPoints.rboxElemPoint.x +
           (mousePoint.x - this.mouseDownClickedPoint.x)
       );
       this.currGroup.rboxElem.y(
-        this.mouseDownPoints.rboxElemPoint.y +
+        this.moveMouseDownPoints.rboxElemPoint.y +
           (mousePoint.y - this.mouseDownClickedPoint.y)
       );
 
@@ -117,7 +117,7 @@ export default class TransformTool extends Vue {
   moveOnMouseUp() {
     this.mouseDown = false;
     this.mouseDownClickedPoint = null;
-    this.mouseDownPoints = null;
+    this.moveMouseDownPoints = null;
     this.$eventHub.saveSvg();
   }
 
