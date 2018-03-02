@@ -145,16 +145,15 @@ export default class TransformTool extends Vue {
         rboxElem: newRBRect,
         toolGroup: toolGroup
       };
-      thisGroup.rboxElem.click((evt: MouseEvent) => {
-        this.clickedRbox(evt, thisGroup, svgjs);
+      thisGroup.rboxElem.click(() => {
+        this.clickedRbox(thisGroup, svgjs);
       });
       this.allGroups.push(thisGroup);
     });
   }
 
-  clickedRbox(evt: MouseEvent | TouchEvent, group: ToolGroup, svgjs: SVG.Doc) {
-    svgjs.off("mousemove.transformTool");
-    svgjs.off("mouseup.transformTool");
+  clickedRbox(group: ToolGroup, svgjs: SVG.Doc) {
+    (svgjs as any).off(".transformTool");
     this.clearCurrToolGroup();
     let transformTool = group.toolGroup.group();
     let boundingBox = transformTool
@@ -215,7 +214,7 @@ export default class TransformTool extends Vue {
     ) {
       return;
     }
-    this.currGroup.toolContainer.off();
+    (this.currGroup.toolContainer as any).off();
     this.currGroup.toolContainer.remove();
 
   }
