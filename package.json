@@ -8,12 +8,14 @@
     "fs": "0.0.1-security",
     "lodash": "^4.17.5",
     "path": "^0.12.7",
+    "pdfjs-dist": "^2.0.301",
     "svg.js": "^2.6.4",
     "vue": "^2.4.4",
     "vueify": "^9.4.1"
   },
   "devDependencies": {
     "@types/electron-devtools-installer": "^2.0.2",
+    "@types/pdfjs-dist": "^0.1.2",
     "electron": "1.7.12",
     "electron-devtools-installer": "^2.2.0",
     "electron-forge": "^4.0.2",

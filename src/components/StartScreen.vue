@@ -1,12 +1,17 @@
 <template>
-  <div class="flex-col height100 flex-Justify-center">
-    <div class="flex-row flex-space-around fiftyHeight">
-      <div class="dev-border thirtyWidth" @click="openDirectory()">Open Score</div>
-      <div class="dev-border thirtyWidth">Recent Scores</div>
-      <div class="dev-border thirtyWidth">Convert from PDF</div>  
+<div class="height100 width100">
+    <div class="flex-col height100 flex-Justify-center">
+        <div class="flex-row flex-space-around fiftyHeight">
+            <div class="dev-border thirtyWidth" @click="openDirectory()">Open Score</div>
+            <div class="dev-border thirtyWidth">Recent Scores</div>
+            <div class="dev-border thirtyWidth" @click="convertPdf()">Convert from PDF</div>
+        </div>
+        <div class="loader" v-if="numToLoad > 0">Loaded {{numLoaded}} of {{numToLoad}}</div>
+
     </div>
-    <div class="loader" v-if="numToLoad > 0">Loaded {{numLoaded}} of {{numToLoad}}</div>
-  </div>
+    <canvas id="conversionCanvas"></canvas>
+</div>
+
 </template>
 
 <script lang="ts">
@@ -15,7 +20,10 @@ import { remote } from "electron";
 import * as fs from "fs";
 import * as path from "path";
 import * as _ from "lodash";
+import { isNullOrUndefined } from "util";
 import { SharedFile } from "../models/SharedFiles";
+import { PDFJSStatic, PDFRenderParams, PDFDocumentProxy } from "pdfjs-dist";
+var PDFJS: PDFJSStatic = require("../../node_modules/pdfjs-dist/build/pdf.combined");
 
 @Component({
   name: "StartScreen"
@@ -67,7 +75,10 @@ export default class StartScreen extends Vue {
             filePathParsed.dir,
             filePathParsed.name + ".svg"
           );
-          var sharedFile: SharedFile = { image: img, baseFileName: path.join(filePathParsed.dir, filePathParsed.name) };
+          var sharedFile: SharedFile = {
+            image: img,
+            baseFileName: path.join(filePathParsed.dir, filePathParsed.name)
+          };
           if (fs.existsSync(svgFileName)) {
             let svgString = fs.readFileSync(svgFileName, "utf8");
             sharedFile.svg = svgString;
@@ -84,10 +95,69 @@ export default class StartScreen extends Vue {
       }
     );
   }
+
+  convertPdf() {
+    // PDFJS.disableWorker = false;
+    // window.PDFJS.workerSrc = "./pdf.worker.js";
+    remote.dialog.showOpenDialog(
+      {
+        filters: [{ name: "PDFs", extensions: ["pdf"] }]
+      },
+      filenames => {
+        console.log(PDFJS);
+        console.log("Loading " + filenames[0]);
+        // console.log(pdfjsLib.PDFJS);
+        PDFJS.getDocument(filenames[0]).then(pdf => {
+          this.savePageToFile(pdf, 1);
+        });
+      }
+    );
+  }
+
+  savePageToFile(pdf: PDFDocumentProxy, pageNum: number) {
+    if (pageNum > pdf.numPages) {
+      return;
+    }
+    pdf.getPage(pageNum).then(page => {
+      var conversionCanvasElem = document.getElementById(
+        "conversionCanvas"
+      ) as HTMLCanvasElement;
+      var conversionCanvasContext = conversionCanvasElem.getContext("2d");
+      if (isNullOrUndefined(conversionCanvasContext)) {
+        console.log("Failed to find conversion canvas!");
+        return;
+      }
+      console.log("Processing page " + page.pageNumber);
+
+      var scale = 2;
+      var viewport = page.getViewport(scale);
+      conversionCanvasElem.height = viewport.height;
+      conversionCanvasElem.width = viewport.width;
+      var renderContext: PDFRenderParams = {
+        canvasContext: conversionCanvasContext,
+        viewport
+      };
+
+      page.render(renderContext).then(() => {
+        const canvasDataStr = conversionCanvasElem.toDataURL();
+        const data = canvasDataStr.replace(/^data:image\/png;base64,/, "");
+        console.log(`Creating C:\\test2\\${pageNum}.png`);
+        if (!fs.existsSync("C:\\test2")) {
+          fs.mkdirSync("C:\\test2");
+        }
+        fs.writeFileSync(`C:\\test2\\${pageNum}.png`, data, "base64");
+        this.savePageToFile(pdf, pageNum + 1);
+      });
+    });
+  }
 }
 </script>
 
 <style scoped>
+#conversionCanvas {
+  display: none;
+}
+
 .flex-space-around {
   justify-content: space-around;
 }
