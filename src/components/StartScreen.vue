@@ -17,7 +17,7 @@
 <script lang="ts">
 import { Vue, Component } from "vue-property-decorator";
 import { remote } from "electron";
-import * as fs from "fs";
+import * as fs from "fs-extra";
 import * as path from "path";
 import * as _ from "lodash";
 import { isNullOrUndefined } from "util";
@@ -108,13 +108,23 @@ export default class StartScreen extends Vue {
         console.log("Loading " + filenames[0]);
         // console.log(pdfjsLib.PDFJS);
         PDFJS.getDocument(filenames[0]).then(pdf => {
-          this.savePageToFile(pdf, 1);
+          remote.dialog.showOpenDialog(
+            {
+              title: "Save images to...",
+              properties: ["openDirectory"]
+            },
+            (directoryPath) => {
+              let directoryToSaveTo = directoryPath[0];
+              this.savePageToFile(pdf, 1, directoryToSaveTo);
+            }
+          );
+          
         });
       }
     );
   }
 
-  savePageToFile(pdf: PDFDocumentProxy, pageNum: number) {
+  savePageToFile(pdf: PDFDocumentProxy, pageNum: number, folderPath: string) {
     if (pageNum > pdf.numPages) {
       return;
     }
@@ -129,7 +139,7 @@ export default class StartScreen extends Vue {
       }
       console.log("Processing page " + page.pageNumber);
 
-      var scale = 2;
+      var scale = 1;
       var viewport = page.getViewport(scale);
       conversionCanvasElem.height = viewport.height;
       conversionCanvasElem.width = viewport.width;
@@ -141,12 +151,10 @@ export default class StartScreen extends Vue {
       page.render(renderContext).then(() => {
         const canvasDataStr = conversionCanvasElem.toDataURL();
         const data = canvasDataStr.replace(/^data:image\/png;base64,/, "");
-        console.log(`Creating C:\\test2\\${pageNum}.png`);
-        if (!fs.existsSync("C:\\test2")) {
-          fs.mkdirSync("C:\\test2");
-        }
-        fs.writeFileSync(`C:\\test2\\${pageNum}.png`, data, "base64");
-        this.savePageToFile(pdf, pageNum + 1);
+        console.log(`Creating ${folderPath}\\${pageNum}.png`);
+        fs.mkdirsSync(folderPath);
+        fs.writeFileSync(`${folderPath}\\${pageNum}.png`, data, "base64");
+        this.savePageToFile(pdf, pageNum + 1, folderPath);
       });
     });
   }
