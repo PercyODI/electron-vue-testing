@@ -3,12 +3,13 @@
         <!-- <div class="dev-border">Future Toolbar!</div> -->
         <div class="flex-row flex-grow">
             <div class="dev-border flex-col flex-justify-between width145" ref="toolbarLeft">
+              <button @click="showStartScreen" class="flex-grow-0">Back to Start</button>
                 <LeftToolBar />
                 <button v-on:click="backTwoPages()" class="pageButtonSize">Back</button>
             </div>
             <div class="flex-grow flex-row flex-Justify-center width100">
-                <ScorePage class="" :height="spHeight" :width="spWidth" :files="sharedFiles[currentLeftFile]" />
-                <ScorePage class="" :height="spHeight" :width="spWidth" :files="sharedFiles[currentRightFile]" />
+                <ScorePage class="" :height="spHeight" :width="spWidth" :files="sharedFiles[currentLeftFile]"  v-if="currentLeftFile < sharedFiles.length" />
+                <ScorePage class="" :height="spHeight" :width="spWidth" :files="sharedFiles[currentRightFile]" v-if="currentRightFile < sharedFiles.length" />
             </div>
             <div class="dev-border flex-col width145" ref="toolbarRight">
                 <div class="dev-border flex-grow">
@@ -49,6 +50,10 @@ export default class ViewScreen extends Vue {
   $refs: {
     toolbarLeft: HTMLElement,
     toolbarRight: HTMLElement
+  }
+
+  showStartScreen(){
+    this.$emit("showStartScreen");
   }
 
   setSize() {
@@ -114,5 +119,9 @@ export default class ViewScreen extends Vue {
 
 .pageButtonSize {
   height: 20%;
+}
+
+.flex-grow-0 {
+  flex-grow: 0;
 }
 </style>

@@ -2,7 +2,8 @@
   <div 
     class="position-relative"
     v-bind:class="classObject" 
-    v-bind:style="{height: this.compHeight + 'px', width: this.compWidth + 'px'}">
+    v-bind:style="{height: this.compHeight + 'px', width: this.compWidth + 'px'}"
+    >
       <img :src="imgSrc" 
         alt="" 
         class="position-absolute"
@@ -27,7 +28,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { isNullOrUndefined } from "util";
 import { SharedFile } from "../models/SharedFiles";
-import {EventHub} from "./EventHub";
+import { EventHub } from "./EventHub";
 
 @Component({
   name: "ScorePage"
@@ -69,7 +70,7 @@ export default class ScorePage extends Vue {
   }
 
   imgLoaded() {
-      console.log("Image Loaded");
+    console.log("Image Loaded");
     this.originalHeight = this.$refs.image.naturalHeight;
     this.originalWidth = this.$refs.image.naturalWidth;
     this.updateScale();
@@ -139,8 +140,8 @@ export default class ScorePage extends Vue {
     if (!isNullOrUndefined(this.files.svg) && this.files.svg !== "") {
       primaryGroup.svg(this.files.svg);
     }
-    if(isNullOrUndefined(svg)) {
-        console.log("svg in importOrCreateSvg is null....")
+    if (isNullOrUndefined(svg)) {
+      console.log("svg in importOrCreateSvg is null....");
     }
     return svg;
   }
@@ -154,13 +155,14 @@ export default class ScorePage extends Vue {
   }
 
   mounted() {
-    console.log("Mounting ScorePage")
+    console.log("Mounting ScorePage");
     let svgjs = this.importOrCreateSvg();
     this.$eventHub.updateSvg(svgjs);
   }
 
   updated() {
     console.log("ScorePage Updated");
+    console.log(this.files);
     this.updateScale();
     let svgjs = this.importOrCreateSvg();
     this.$eventHub.updateSvg(svgjs);

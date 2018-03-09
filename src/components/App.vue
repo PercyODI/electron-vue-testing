@@ -4,7 +4,7 @@
         <StartScreen @showViewScreen="showViewScreen" />
     </div>
     <div v-if="!showStart" class="width100 height100">
-        <ViewScreen :sharedFiles="images"/>
+        <ViewScreen :sharedFiles="images" @showStartScreen="showStartScreen"/>
     </div>
 </div>
 
@@ -40,6 +40,10 @@ export default class App extends Vue {
       this.images = sharedFiles;
       this.toggleShowStart();
     }
+  }
+
+  showStartScreen() {
+    this.showStart = true;
   }
 }
 </script>
